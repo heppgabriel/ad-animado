@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
-# Ad Animado — instalação (Mac ou Linux). Rode de dentro da pasta baixada:
-#     ./instalar.sh
-# ou, para baixar e instalar de uma vez a partir do GitHub:
-#     AD_ANIMADO_REPO=https://github.com/USUARIO/ad-animado.git bash instalar.sh
+# Ad Animado — instalação (Mac ou Linux). Um comando só, no Terminal:
+#     curl -fsSL https://raw.githubusercontent.com/heppgabriel/ad-animado/main/instalar.sh | bash
+# (ou ./instalar.sh de dentro da pasta já baixada)
 # Pode rodar de novo a qualquer momento para atualizar: os ads (~/Ads Animados) e as
 # chaves (~/.config/ad-animado) ficam fora da pasta do app e nunca são apagados.
 set -euo pipefail
-AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || pwd)"
+AQUI="$(cd "$(dirname "${BASH_SOURCE[0]:-.}")" 2>/dev/null && pwd || pwd)"
 DEST="${AD_ANIMADO_DEST:-$HOME/Ad Animado}"
-REPO="${AD_ANIMADO_REPO:-}"
+REPO="${AD_ANIMADO_REPO:-https://github.com/heppgabriel/ad-animado.git}"
 
 echo "== Ad Animado — instalação =="
 falta=()
@@ -37,13 +36,13 @@ fi
 echo "Python: $("$PY" --version)"
 
 # Código: a pasta atual (se já é o app) ou um clone/atualização do GitHub.
-if [ -f "$AQUI/app/servidor.py" ] && [ -z "$REPO" ]; then
+if [ -f "$AQUI/app/servidor.py" ]; then
   DEST="$AQUI"
   [ -d "$DEST/.git" ] && git -C "$DEST" pull --ff-only 2>/dev/null || true
-elif [ -n "$REPO" ]; then
-  if [ -d "$DEST/.git" ]; then git -C "$DEST" pull --ff-only; else git clone "$REPO" "$DEST"; fi
+elif [ -d "$DEST/.git" ]; then
+  echo "Atualizando a instalação em \"$DEST\"..."; git -C "$DEST" pull --ff-only
 else
-  echo "Rode este script de dentro da pasta do Ad Animado, ou passe AD_ANIMADO_REPO=<link do GitHub>."; exit 1
+  echo "Baixando o Ad Animado em \"$DEST\"..."; git clone "$REPO" "$DEST"
 fi
 cd "$DEST"
 

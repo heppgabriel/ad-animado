@@ -14,26 +14,22 @@ Transforma uma copy de anúncio (locução ou fala do personagem) + imagens de r
 
 ## Instalar (Mac)
 
-Precisa do [Homebrew](https://brew.sh). No Terminal, dentro da pasta do app:
+Abra o **Terminal** (Cmd + Espaço, digite "Terminal"), cole o comando abaixo e aperte Enter:
 
 ```bash
-./instalar.sh
+curl -fsSL https://raw.githubusercontent.com/heppgabriel/ad-animado/main/instalar.sh | bash
 ```
 
-Ou direto do GitHub (se o repositório for privado, entre antes com `gh auth login`):
+Na primeira vez demora alguns minutos. Se faltar o Homebrew, instale antes pelo site [brew.sh](https://brew.sh) e rode o comando de novo.
 
-```bash
-gh repo clone USUARIO/ad-animado ~/"Ad Animado" && cd ~/"Ad Animado" && ./instalar.sh
-```
-
-O instalador cria o ícone **Ad Animado** na área de trabalho. Depois é só clicar nele, ou:
+No fim, o app abre sozinho no navegador e aparece o ícone **Ad Animado** na área de trabalho. Da próxima vez, é só clicar nele. Pelo Terminal:
 
 ```bash
 cd ~/"Ad Animado" && ./iniciar.sh      # abre http://localhost:4124
 cd ~/"Ad Animado" && ./parar.sh        # encerra (uma geração em andamento continua)
 ```
 
-Para atualizar: `cd ~/"Ad Animado" && git pull && ./instalar.sh`.
+Para atualizar, rode o mesmo comando de instalação de novo.
 
 ## Primeira vez: ⚙ Configurações
 
