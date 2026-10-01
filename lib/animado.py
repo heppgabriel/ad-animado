@@ -61,7 +61,7 @@ class Estado:
         with self.lock: self.s.update(rodando=False, status=status, mensagem=mensagem, fim=time.time()); self.salvar()
     def salvar(self):
         with self.lock:
-            tmp = f"{self.arq}.{threading.get_ident()}.tmp"; json.dump(self.s, open(tmp, "w"), ensure_ascii=False, indent=1); os.replace(tmp, self.arq)
+            tmp = f"{self.arq}.{threading.get_ident()}.tmp"; json.dump(self.s, open(tmp, "w"), ensure_ascii=False, indent=1); comum.trocar(tmp, self.arq)
 
 def roda(est, i, fn, forcar=False):
     if est.et(i)["estado"] == "ok" and not forcar: return
@@ -81,7 +81,7 @@ class Board:
         with self.lock: self.beat(n).update(kw); self.salvar()
     def salvar(self):
         with self.lock:
-            tmp = f"{self.arq}.{threading.get_ident()}.tmp"; json.dump(self.b, open(tmp, "w"), ensure_ascii=False, indent=1); os.replace(tmp, self.arq)
+            tmp = f"{self.arq}.{threading.get_ident()}.tmp"; json.dump(self.b, open(tmp, "w"), ensure_ascii=False, indent=1); comum.trocar(tmp, self.arq)
 
 # ---------------------------------------------------------------- SRT
 def tc(s):

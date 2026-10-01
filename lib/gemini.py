@@ -14,7 +14,7 @@ MODELOS = [dict(id="gemini-3.8-flash", nome="Gemini 3.8 Flash (recomendado)"),
 PRECOS = {"gemini-3.8-flash": (0.75, 3.75), "gemini-3.7-flash": (0.75, 3.75), "gemini-3.5-flash-lite": (0.30, 2.50),
           "gemini-3.1-flash-lite": (0.25, 1.50), "gemini-3.1-pro-preview": (2.0, 12.0)}
 LIMITE_INLINE = 18 * 1024 * 1024
-PATH = "/opt/homebrew/bin:/usr/local/bin:" + os.environ.get("PATH", "")
+PATH = os.pathsep.join(["/opt/homebrew/bin", "/usr/local/bin", os.environ.get("PATH", "")])
 
 class ErroGemini(RuntimeError):
     def __init__(self, msg, fatal=False): super().__init__(msg); self.fatal = fatal   # fatal: não adianta tentar os outros

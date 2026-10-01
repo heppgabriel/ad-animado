@@ -12,31 +12,40 @@ Transforma uma copy de anúncio (locução ou fala do personagem) + imagens de r
 
 É o mesmo módulo "Ad Animado" do Atlas Editor, como app independente, com chaves e ads próprios.
 
-## Instalar (Mac)
+## Instalar
 
-Abra o **Terminal** (Cmd + Espaço, digite "Terminal"), cole o comando abaixo e aperte Enter:
+### Mac
+
+Abra o **Terminal** (Cmd + Espaço, digite "Terminal"), cole e aperte Enter:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/heppgabriel/ad-animado/main/instalar.sh | bash
 ```
 
-Na primeira vez demora alguns minutos. Se faltar o Homebrew, instale antes pelo site [brew.sh](https://brew.sh) e rode o comando de novo.
+Se faltar o Homebrew, instale antes pelo site [brew.sh](https://brew.sh) e rode o comando de novo.
 
-No fim, o app abre sozinho no navegador e aparece o ícone **Ad Animado** na área de trabalho. Da próxima vez, é só clicar nele. Pelo Terminal:
+### Windows
 
-```bash
-cd ~/"Ad Animado" && ./iniciar.sh      # abre http://localhost:4124
-cd ~/"Ad Animado" && ./parar.sh        # encerra (uma geração em andamento continua)
+Abra o **PowerShell** (tecla Windows, digite "PowerShell"), cole e aperte Enter:
+
+```powershell
+irm https://raw.githubusercontent.com/heppgabriel/ad-animado/main/instalar.ps1 | iex
 ```
 
-Para atualizar, rode o mesmo comando de instalação de novo.
+Ele instala o que faltar (Git, Python 3.12, ffmpeg) pelo winget. Se pedir para fechar e abrir o PowerShell de novo, faça isso e rode o mesmo comando outra vez.
+
+### Depois de instalar
+
+Na primeira vez demora alguns minutos. No fim, o app abre sozinho no navegador (http://localhost:4124) e aparece o atalho **Ad Animado** na área de trabalho. Da próxima vez, é só clicar nele.
+
+Para atualizar, rode o mesmo comando de instalação de novo. Os ads e as chaves nunca são apagados.
 
 ## Primeira vez: ⚙ Configurações
 
 | O quê | Para quê | Como |
 |---|---|---|
-| **Claude** | storyboard, prompts, conferência | Pela **assinatura** (Pro/Max): precisa do Claude Code instalado e logado no Mac (`claude` no Terminal). Se o teste falhar, rode `claude setup-token` e cole o token. Ou use uma chave da API. |
-| **Grok** | imagens e vídeos | Pela **assinatura**: rode `grok` no Terminal uma vez e entre com a sua conta (usa a cota semanal, sem cobrança por uso). Ou use uma chave da API da xAI. |
+| **Claude** | storyboard, prompts, conferência | Pela **assinatura** (Pro/Max): precisa do Claude Code instalado e logado no computador (`claude` no Terminal/PowerShell). Se o teste falhar, rode `claude setup-token` e cole o token. Ou use uma chave da API. |
+| **Grok** | imagens e vídeos | Pela **assinatura**: precisa do Grok CLI instalado e logado (rode `grok` uma vez e entre com a sua conta; usa a cota semanal, sem cobrança por uso). Sem ele, use uma chave da API da xAI ou a KIE. |
 | **KIE** | Nano Banana, Seedream, Kling, Seedance, Veo… | Chave em kie.ai › API Key (cobra créditos). |
 | **Gemini** | opcional: assistir o vídeo de referência | Chave do Google AI Studio (tem plano gratuito). Sem ela, o Claude estuda a referência pelos quadros. |
 
@@ -44,8 +53,8 @@ Cada pessoa da equipe usa as **próprias** contas: as chaves ficam só no comput
 
 ## Onde ficam as coisas
 
-- Ads: `~/Ads Animados/<nome do ad>/` (imagens, vídeos, `final.mp4`, SRT, custos)
-- Chaves: `~/.config/ad-animado/chaves.json` (permissão 600, nunca vai para o GitHub)
+- Ads: pasta `Ads Animados` dentro da pasta pessoal (`~/Ads Animados` no Mac, `C:\Users\<você>\Ads Animados` no Windows) (imagens, vídeos, `final.mp4`, SRT, custos)
+- Chaves: `.config/ad-animado/chaves.json` dentro da pasta pessoal (permissão 600, nunca vai para o GitHub)
 - Registro do servidor: `~/.ad-animado.log`
 
 A porta (4124) e a pasta dos ads podem ser trocadas em `config.json`.
@@ -53,5 +62,5 @@ A porta (4124) e a pasta dos ads podem ser trocadas em `config.json`.
 ## Testes
 
 ```bash
-.venv/bin/python -m unittest discover -s tests
+.venv/bin/python -m unittest discover -s tests        # Windows: .venv\Scripts\python -m unittest discover -s tests
 ```

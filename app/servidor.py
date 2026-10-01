@@ -5,6 +5,8 @@ O trabalho pesado roda em lib/animado.py, num processo separado: reiniciar o ser
 import os, re, sys, json, math, time, glob, shutil, signal, secrets, errno, threading, subprocess, mimetypes, urllib.parse
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 
+if os.name == "nt" and not sys.flags.utf8_mode:           # Windows: tudo em UTF-8 (acentos dos nomes, JSON, SRT)
+    sys.exit(subprocess.call([sys.executable, "-X", "utf8"] + sys.argv))
 APP = os.path.dirname(os.path.abspath(__file__)); RAIZ_APP = os.path.dirname(APP); LIB = os.path.join(RAIZ_APP, "lib")
 sys.path.insert(0, LIB)
 import comum, chaves, custos, gemini, gerativa
@@ -14,7 +16,7 @@ VENV_PY = sys.executable
 MAX_UPLOAD = int(os.environ.get("AD_ANIMADO_MAX_UPLOAD", str(8 * 1024**3)))
 EXT_VIDEO = (".mp4", ".mov", ".m4v", ".webm", ".mkv")
 EXT_SERVIDOS = EXT_VIDEO + (".mp3", ".wav", ".m4a", ".ogg", ".aac", ".flac", ".png", ".jpg", ".jpeg", ".webp", ".gif", ".srt", ".json")
-mimetypes.add_type("video/mp4", ".mp4"); mimetypes.add_type("video/quicktime", ".mov"); mimetypes.add_type("application/x-subrip", ".srt")
+mimetypes.add_type("video/mp4", ".mp4"); mimetypes.add_type("image/jpeg", ".jpg"); mimetypes.add_type("image/png", ".png"); mimetypes.add_type("image/webp", ".webp"); mimetypes.add_type("video/quicktime", ".mov"); mimetypes.add_type("application/x-subrip", ".srt")
 
 def entrada(): return os.path.join(comum.RAIZ, ".entrada")   # arquivos enviados antes do ad ser criado
 
@@ -26,9 +28,7 @@ def permitido(p):
     if os.path.realpath(p) == os.path.realpath(chaves.ARQ): return False
     return os.path.splitext(p)[1].lower() in EXT_SERVIDOS and dentro(p, comum.RAIZ)
 
-def vivo(pid):
-    try: os.kill(int(pid), 0); return True
-    except (TypeError, ValueError, ProcessLookupError, PermissionError): return False
+def vivo(pid): return comum.vivo(pid)
 
 def matar_processo(pid):
     if os.name == "nt": subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], capture_output=True)
@@ -83,8 +83,11 @@ def pasta_animado(slug):
     return p
 
 def _json_ou(arq, padrao):
-    try: return json.load(open(arq))
-    except (OSError, ValueError): return padrao
+    for k in range(5):                                   # no Windows o arquivo pode estar sendo trocado neste instante
+        try: return json.load(open(arq, encoding="utf-8"))
+        except PermissionError: time.sleep(0.05)
+        except (OSError, ValueError): return padrao
+    return padrao
 
 def estado_animado_bruto(p):
     st = _json_ou(os.path.join(p, "estado.json"), dict(rodando=False, status="novo", etapas=[], log=[]))
@@ -150,8 +153,9 @@ def lancar_animado(p, acao, nums=None):
     st = estado_animado_bruto(p)
     if st.get("rodando"): raise ValueError("este ad animado já está rodando")
     cmd = [VENV_PY, os.environ.get("AD_ANIMADO_SCRIPT") or os.path.join(LIB, "animado.py"), p, acao] + ([",".join(str(int(x)) for x in nums)] if nums else [])
-    env = {k: v for k, v in os.environ.items() if not k.startswith(("CLAUDE", "ANTHROPIC"))}
-    pr = subprocess.Popen(cmd, stdout=open(os.path.join(p, "saida.log"), "a"), stderr=subprocess.STDOUT, start_new_session=True, env=env, cwd=p)
+    env = dict({k: v for k, v in os.environ.items() if not k.startswith(("CLAUDE", "ANTHROPIC"))}, PYTHONUTF8="1")
+    extra = dict(creationflags=0x00000200 | 0x08000000) if comum.WINDOWS else dict(start_new_session=True)   # Windows: grupo próprio, sem janela
+    pr = subprocess.Popen(cmd, stdout=open(os.path.join(p, "saida.log"), "a", encoding="utf-8"), stderr=subprocess.STDOUT, env=env, cwd=p, **extra)
     for _ in range(50):
         s = estado_animado_bruto(p)
         if s.get("pid") == pr.pid and s.get("rodando"): break
@@ -228,7 +232,9 @@ def acao_animado(slug, d):
     if st.get("rodando"): raise ValueError("espere a etapa atual terminar (ou cancele)")
     arq_b = os.path.join(p, "storyboard.json"); B = _json_ou(arq_b, dict(beats=[])); por_n = {b["n"]: b for b in B.get("beats", [])}
     def grava():
-        tmp = arq_b + ".tmp"; json.dump(B, open(tmp, "w"), ensure_ascii=False, indent=1); os.replace(tmp, arq_b)
+        tmp = arq_b + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f: json.dump(B, f, ensure_ascii=False, indent=1)
+        comum.trocar(tmp, arq_b)
     nums = sorted({int(n) for n in d.get("nums") or [] if int(n) in por_n})
     prompts = {int(k): str(v).strip() for k, v in (d.get("prompts") or {}).items() if str(v).strip() and int(k) in por_n}
     if acao == "apagar":
@@ -306,7 +312,7 @@ def acao_animado(slug, d):
 # ---------------------------------------------------------------- configurações e custos
 def testar_claude():
     try: r = subprocess.run([VENV_PY, os.path.join(LIB, "ia.py"), "testar"], capture_output=True, text=True, timeout=90,
-                            env={k: v for k, v in os.environ.items() if not k.startswith(("CLAUDE", "ANTHROPIC"))})
+                            env=dict({k: v for k, v in os.environ.items() if not k.startswith(("CLAUDE", "ANTHROPIC"))}, PYTHONUTF8="1"))
     except subprocess.TimeoutExpired: return dict(ok=False, msg="o Claude demorou demais para responder")
     try: return json.loads(r.stdout.strip().splitlines()[-1])
     except (ValueError, IndexError): return dict(ok=False, msg=(r.stderr or "falhou")[-200:])

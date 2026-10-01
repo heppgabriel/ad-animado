@@ -58,7 +58,8 @@ def token_assinatura():
     return achados[0] if achados else ""
 
 def binario_grok():
-    return next((b for b in (os.path.expanduser("~/.grok/bin/grok"), shutil.which("grok")) if b and os.path.exists(b)), None)
+    cands = (os.path.expanduser("~/.grok/bin/grok"), os.path.expanduser("~/.grok/bin/grok.exe"), shutil.which("grok"))
+    return next((b for b in cands if b and os.path.exists(b)), None)
 
 def renovar_assinatura():
     """Roda o `grok` uma vez em modo headless: ao abrir, ele renova o token vencido sozinho (gasta quase nada da cota)."""
