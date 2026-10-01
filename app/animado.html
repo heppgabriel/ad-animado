@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Ad Animado</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#0a0a0a;--painel:#161618;--painel2:#1c1c1e;--linha:rgba(255,255,255,.08);--txt:#f5f5f7;--sub:#8e8e93;--sub2:#636366;--azul:#0a84ff;--verde:#30d158;--verm:#ff453a;--amar:#ffd60a;--ctl:rgba(255,255,255,.07);--ctl2:rgba(255,255,255,.12)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:14px -apple-system,BlinkMacSystemFont,"Avenir Next",sans-serif}
+header{display:flex;align-items:center;gap:14px;padding:14px 24px;border-bottom:1px solid var(--linha);background:var(--painel);position:sticky;top:0;z-index:5}
+header h1{font-size:18px;margin:0}header .esp{flex:1}header a.volta{color:var(--sub);text-decoration:none}header a.volta:hover{color:var(--txt)}
+main{padding:22px 24px 80px;max-width:1500px;margin:0 auto}
+button,select,input,textarea{font:inherit;color:var(--txt);background:var(--ctl);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:7px 11px}
+button{cursor:pointer}button.pri{background:var(--azul);border-color:var(--azul)}button.ok{background:#1f6f3a;border-color:#2c8a4c}button.perigo{color:#ff8a82}
+button:hover{border-color:rgba(255,255,255,.25)}button:disabled{opacity:.45;cursor:default}
+textarea{width:100%;resize:vertical;min-height:70px;line-height:1.4}
+.cinza{color:var(--sub)}.peq{font-size:12px}.nw{white-space:nowrap}
+.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+.cardp{background:var(--painel);border:1px solid var(--linha);border-radius:14px;overflow:hidden;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.cardp:hover{border-color:rgba(255,255,255,.2)}
+.cardp .capa{aspect-ratio:9/16;background:#000 center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:var(--sub2)}
+.cardp .inf{padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.selo{display:inline-block;border-radius:20px;padding:1px 9px;font-size:11px;border:1px solid rgba(255,255,255,.14);color:#c7c7cc}
+.selo.rodando{color:#64b5ff;border-color:#1f4a6e}.selo.erro{color:#ff8a82;border-color:#6b2520}.selo.aguardando{color:var(--amar);border-color:#6b5a14}.selo.pronto{color:#6ee795;border-color:#1d5c34}
+.painel{background:var(--painel);border:1px solid var(--linha);border-radius:14px;padding:18px;margin-bottom:18px}
+.painel h3{margin:0 0 12px;font-size:15px}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:18px}.form .todo{grid-column:1/-1}
+.form label{display:block;color:var(--sub);font-size:12px;margin:0 0 6px}
+.drop{border:1.5px dashed rgba(255,255,255,.18);border-radius:12px;padding:18px;text-align:center;color:var(--sub);cursor:pointer}
+.drop.sobre{border-color:var(--azul);color:var(--txt)}
+.refs{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.ref{width:150px;background:var(--painel2);border:1px solid var(--linha);border-radius:10px;overflow:hidden;font-size:12px}
+.ref img{width:100%;aspect-ratio:1;object-fit:cover;display:block}.ref .c{padding:6px;display:flex;flex-direction:column;gap:5px}.ref select,.ref input{font-size:12px;padding:4px 6px;width:100%}
+.modo{display:flex;gap:10px}.modo label{flex:1;border:1px solid var(--linha);border-radius:10px;padding:10px;cursor:pointer;color:var(--txt);font-size:13px}
+.modo label.on{border-color:var(--azul);background:rgba(10,132,255,.08)}.modo span{display:block;color:var(--sub);font-size:12px;margin-top:3px}
+.aviso{color:var(--amar);font-size:12px;margin-top:6px}.erro{color:#ff8a82}
+.etapas{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
+.et{font-size:12px;padding:5px 10px;border-radius:8px;background:var(--ctl);color:var(--sub)}
+.et.ok{color:#6ee795}.et.rodando{color:#64b5ff;background:rgba(10,132,255,.12)}.et.erro{color:#ff8a82;background:rgba(255,69,58,.1)}
+.et small{display:block;color:var(--sub2);font-size:11px;margin-top:2px;max-width:260px}
+.acoes{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.beats{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.beat{background:var(--painel);border:1px solid var(--linha);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.beat.refazer{border-color:#8a6d12}.beat.erro{border-color:#6b2520}.beat.sel{outline:2px solid var(--azul)}
+.beat .midia{position:relative;aspect-ratio:9/16;background:#000;display:flex;align-items:center;justify-content:center;color:var(--sub2)}
+.beat .midia img,.beat .midia video{width:100%;height:100%;object-fit:cover;display:block}
+.beat .num{position:absolute;left:8px;top:8px;background:rgba(0,0,0,.7);border-radius:6px;padding:2px 7px;font-weight:700;font-size:12px}
+.beat .tr{position:absolute;right:8px;top:8px;border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700}
+.tr.AVATAR{background:#3a2a5c;color:#d9c2ff}.tr.BROLL{background:#1f4a3a;color:#9ff0c9}.tr.PRODUTO{background:#5c3a1a;color:#ffd0a1}
+.beat .chk{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.7);border-radius:6px;padding:3px 6px;font-size:12px}
+.beat .gerando{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);font-size:12px}
+.beat .corpo{padding:10px;display:flex;flex-direction:column;gap:7px;font-size:12.5px}
+.beat .fala{font-weight:600;line-height:1.35}.beat .tc{color:var(--sub);font-size:11.5px;font-variant-numeric:tabular-nums}
+.veredito{font-size:12px;border-radius:8px;padding:6px 8px;line-height:1.35}
+.veredito.bom{background:rgba(48,209,88,.1);color:#8fe3b0}.veredito.ruim{background:rgba(255,214,10,.1);color:#ffe27a}.veredito.falha{background:rgba(255,69,58,.1);color:#ff9a93}
+.beat textarea{font-size:12px;min-height:88px}
+.hist{display:flex;gap:4px}.hist img{width:34px;height:60px;object-fit:cover;border-radius:4px;opacity:.7}
+details summary{cursor:pointer;color:var(--sub)}details pre{white-space:pre-wrap;font-size:12px;background:var(--painel2);padding:10px;border-radius:8px;max-height:320px;overflow:auto}
+.locks pre{white-space:pre-wrap;font-size:12px;background:var(--painel2);padding:10px;border-radius:8px;margin:4px 0 10px}
+.timeline{display:flex;height:84px;border-radius:10px;overflow:hidden;background:#000;margin-top:10px}
+.timeline div{position:relative;border-right:1px solid #000;background:#222 center/cover no-repeat;min-width:3px;cursor:pointer}
+.timeline div span{position:absolute;left:3px;bottom:3px;font-size:10px;background:rgba(0,0,0,.7);border-radius:4px;padding:0 4px}
+.final{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}.final video{height:520px;max-width:100%;border-radius:10px;background:#000}
+.prog{height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:6px}.prog s{display:block;height:100%;background:var(--azul);text-decoration:none}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:40px 16px}
+.modal.on{display:flex}.modal .caixa{background:var(--painel);border:1px solid var(--linha);border-radius:14px;padding:20px;width:100%;max-width:720px}
+.cfgcard{background:var(--painel2);border:1px solid var(--linha);border-radius:12px;padding:14px;margin-bottom:12px}.cfgcard h4{margin:0 0 8px;font-size:14px}
+.cfgcard label{display:block;color:var(--sub);font-size:12px;margin:10px 0 5px}.cfgcard input,.cfgcard select{width:100%}
+.st{font-size:12px;color:var(--sub)}.st.ok{color:#6ee795}.st.no{color:#ff8a82}
+table.tab{width:100%;border-collapse:collapse;font-size:13px}table.tab td,table.tab th{padding:7px 8px;border-bottom:1px solid var(--linha);text-align:left}table.tab .n{text-align:right;font-variant-numeric:tabular-nums}
+@media(max-width:800px){.form{grid-template-columns:1fr}main{padding:16px}}
+</style>
+</head>
+<body>
+<header><a class="volta" href="/" style="color:var(--txt)"><h1>Ad Animado</h1></a><span class="esp"></span><button onclick="abrirCustos()">Custos</button><button onclick="abrirCfg()">⚙ Configurações</button><button class="pri" id="btNovo" onclick="abrirNovo()">+ Novo ad animado</button></header>
+<div class="modal" id="cfg"><div class="caixa">
+  <div class="acoes" style="justify-content:space-between;margin-bottom:6px"><h3 style="margin:0">Configurações</h3><button onclick="fecharCfg()">Fechar</button></div>
+  <p class="cinza peq">As chaves ficam só neste computador (~/.config/ad-animado). A página recebe apenas se está configurada e os últimos caracteres. Campo vazio mantém a chave atual.</p>
+  <div class="cfgcard"><h4>Claude <span class="cinza peq">(storyboard, prompts e conferência das imagens)</span></h4>
+    <label>Como usar o Claude</label><select id="cAuth" onchange="mostraAuthClaude()"></select>
+    <div id="linA"><label>Chave da API da Anthropic</label><input type="password" id="kA" autocomplete="off" placeholder="sk-ant-…"></div>
+    <div id="linT" hidden><label>Token do Claude Code (opcional — se o teste falhar, rode <code>claude setup-token</code> no Terminal e cole aqui)</label><input type="password" id="kT" autocomplete="off" placeholder="sk-ant-oat…"></div>
+    <label>Modelo</label><select id="mod"></select>
+    <div class="acoes" style="margin-top:8px"><button onclick="testar('anthropic')">Testar</button><span class="st" id="stA"></span></div></div>
+  <div class="cfgcard"><h4>Grok <span class="cinza peq">(imagens e vídeos)</span></h4>
+    <label>Como conectar</label><select id="genA" onchange="$('#linX').hidden=this.value!='api'"></select>
+    <div id="linX"><label>Chave da API da xAI</label><input type="password" id="kX" autocomplete="off" placeholder="xai-…"></div>
+    <label>Modelo das imagens do Grok</label><select id="genM"></select>
+    <div class="acoes" style="margin-top:8px"><button onclick="testar('xai')">Testar a conexão</button><span class="st" id="stX"></span></div></div>
+  <div class="cfgcard"><h4>KIE <span class="cinza peq">(Nano Banana, Seedream, GPT Image, Kling, Seedance, Hailuo, Wan, Veo…)</span></h4>
+    <label>Chave da API (kie.ai › API Key)</label><input type="password" id="kK" autocomplete="off" placeholder="chave da KIE…">
+    <div class="acoes" style="margin-top:8px"><button onclick="testar('kie')">Testar</button><span class="st" id="stK"></span></div></div>
+  <div class="cfgcard"><h4>Padrões dos ads novos</h4>
+    <label>IA das imagens</label><select id="genI"></select><label>IA dos vídeos</label><select id="genV"></select><label>Resolução dos vídeos</label><select id="genR"></select></div>
+  <div class="cfgcard"><h4>Gemini <span class="cinza peq">(opcional: assiste o vídeo de referência)</span></h4>
+    <label>Chave do Google AI Studio (aistudio.google.com/apikey — dá para usar o plano gratuito)</label><input type="password" id="kG" autocomplete="off" placeholder="AIza…">
+    <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="gGratis" style="width:auto"> Minha chave é do plano gratuito</label>
+    <label>Ou chave da OpenRouter (paga)</label><input type="password" id="kO" autocomplete="off" placeholder="sk-or-…">
+    <label>Modelo</label><select id="modG"></select>
+    <div class="acoes" style="margin-top:8px"><button onclick="testar('gemini')">Testar Google</button><button onclick="testar('openrouter')">Testar OpenRouter</button><span class="st" id="stG"></span></div></div>
+  <div class="acoes"><button class="pri" onclick="salvarCfg(true)">Salvar</button><span class="cinza peq" id="cfgPasta"></span></div>
+</div></div>
+<main id="app"></main>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const arq=p=>p?"/f?p="+encodeURIComponent(p):"";
+const usd=v=>"US$ "+(v||0).toFixed(2).replace(".",",");
+const tc=s=>{s=Math.max(0,s||0);const m=Math.floor(s/60),x=(s-m*60).toFixed(2).padStart(5,"0");return `${m}:${x}`};
+async function post(url,corpo){const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(corpo||{})});const j=await r.json().catch(()=>({}));if(!r.ok||j.erro)throw new Error(j.erro||"falhou");return j}
+function sobe(url,file,prog){return new Promise((ok,falha)=>{const x=new XMLHttpRequest();x.open("POST",url);x.upload.onprogress=e=>prog&&prog(e.total?e.loaded/e.total:0);
+  x.onload=()=>{let j={};try{j=JSON.parse(x.responseText)}catch(e){}if(x.status<300&&j.ok)ok(j);else falha(new Error(j.erro||`falhou (${x.status})`))};x.onerror=()=>falha(new Error("sem conexão"));x.send(file)})}
+const ID=new URLSearchParams(location.search).get("id");
+let E=null,timer=null,SEL=new Set(),EDIT={};
+
+// ---------------- lista
+async function lista(){
+  const L=await (await fetch("/api/animado/lista")).json();
+  $("#app").innerHTML=`<div class="painel"><h3>Como funciona</h3><div class="cinza" style="line-height:1.6">
+    1. Envie as imagens de referência (personagem, produto, estilo — o recomendado são duas ou mais) e o áudio da locução.
+    2. O editor tira o SRT do áudio sozinho. 3. O Claude escreve o storyboard e os prompts (um beat por bloco do SRT, trilhos AVATAR / B-ROLL / PRODUTO, locks).
+    Você escolhe o ritmo (quantos segundos cada clipe fica na tela) e o editor quebra o SRT nesse ritmo. 4. A IA que você escolher (Grok pela assinatura, ou Nano Banana, Seedream, GPT Image… pela KIE) gera as imagens. 5. O Claude confere cada imagem contra o storyboard e diz quais refazer.
+    6. Você aprova. 7. O Claude escreve os prompts de animação, os vídeos são gerados e montados na timeline, batendo com o SRT.</div></div>
+    ${L.length?`<div class="grade">${L.map(a=>`<a class="cardp" href="/animado?id=${encodeURIComponent(a.id)}">
+      <div class="capa" style="${a.capa?`background-image:url('${arq(a.capa)}')`:""}">${a.capa?"":"sem imagem ainda"}</div>
+      <div class="inf"><b>${esc(a.nome)}</b><span class="cinza peq">${a.beats?a.beats+" beats · ":""}${a.modo=="nativo"?"fala nativa":"locução"} · ${esc((a.criado||"").slice(0,10))}</span>
+      <span><span class="selo ${esc(a.status)}">${esc(rotStatus(a.status))}</span> <span class="cinza peq">${usd(a.custo.total)}</span></span></div></a>`).join("")}</div>`
+    :`<div class="cinza" style="padding:30px 0">Nenhum ad animado ainda. Clique em <b>+ Novo ad animado</b>.</div>`}`;
+}
+const rotStatus=s=>({rodando:"rodando",aguardando:"aguardando você",pronto:"pronto",erro:"erro",novo:"novo"}[s]||s||"");
+
+// ---------------- novo
+const CUSTOS=[["zero","100% sem API paga — Claude pela sua assinatura; Gemini só se a chave for do plano gratuito"],
+  ["gemini","Pode usar a API do Gemini (paga) — o Claude continua pela assinatura"],["livre","Pode usar as APIs como estão nas Configurações (Claude e Gemini)"]];
+const NIVEIS=[["auto","Automático — o Claude compara a referência com a copy e dá a nota de 1 a 5"],["5","5 — Cópia fiel (a copy é quase igual; muda o produto)"],
+  ["4","4 — Muito próximo (mesma estrutura e cenas, adapta onde a fala muda)"],["3","3 — Mesma estrutura (mesmo hook, ritmo e tipos de cena)"],
+  ["2","2 — Só a linguagem visual (estilo, câmera, ritmo)"],["1","1 — Inspiração solta (copy nada a ver: cenas criadas para a copy)"]];
+const RITMOS=[{nome:"Bem dinâmico",desc:"1 a 2 s por clipe",min:1,max:2},{nome:"Dinâmico",desc:"2 a 3 s por clipe",min:2,max:3},
+  {nome:"Normal",desc:"3 a 4 s por clipe",min:3,max:4.2},{nome:"Calmo",desc:"4 a 6 s por clipe",min:4,max:6},{nome:"Personalizado",desc:"você escolhe",min:null,max:null}];
+let N=null;
+function nRitmo(k){N.ritmo=k;document.querySelectorAll("#nRitmo label").forEach(l=>l.classList.toggle("on",+l.dataset.r==k));$("#nRitmoP").hidden=RITMOS[k].min!=null}
+function ritmoEscolhido(k,mn,mx){const r=RITMOS[k];if(r.min!=null)return {min:r.min,max:r.max};
+  const a=parseFloat(String(mn).replace(",",".")),b=parseFloat(String(mx).replace(",","."));if(!(a>=0.6&&b>a&&b<=15))throw new Error("ritmo personalizado: mínimo a partir de 0,6 s e máximo maior que o mínimo (até 15 s)");return {min:a,max:b}}
+function abrirNovo(){
+  if(ID){location.href="/animado?novo=1";return}
+  N={id:Math.random().toString(36).slice(2,12)+Date.now().toString(36),refs:[],audio:null,srt:null,modo:"vo",ritmo:1};
+  $("#app").innerHTML=`<div class="painel"><h3>Novo ad animado</h3><div class="form">
+    <div><label>Nome do ad</label><input id="nNome" style="width:100%" placeholder="ex.: Intestino Preso — Lead 3"></div>
+    <div><label>De onde vem a voz</label><div class="modo">
+      <label class="on" data-m="vo" onclick="nModo('vo')">Locução (VO)<span>Eu envio o áudio. Os clipes saem mudos e a voz entra por baixo.</span></label>
+      <label data-m="nativo" onclick="nModo('nativo')">Fala do personagem<span>O áudio sai nativo dos vídeos: o personagem fala as linhas.</span></label></div></div>
+    <div><label>IA das imagens</label><select id="nMI" style="width:100%"></select></div>
+    <div><label>IA dos vídeos</label><select id="nMV" style="width:100%" onchange="nAvisoAudio()"></select><div class="aviso" id="avAud"></div></div>
+    <div class="todo"><label>Montagem</label><div class="modo" id="nMont">
+      <label class="on" data-mt="cortes" onclick="nMont('cortes')">Cortes<span>Cada beat tem a sua imagem; os clipes se cortam no tempo do SRT.</span></label>
+      <label data-mt="continuo" onclick="nMont('continuo')">Contínuo (plano-sequência)<span>Só o primeiro beat vira imagem; cada vídeo continua do último quadro do vídeo anterior.</span></label></div></div>
+    <div class="todo"><label>Uso de API (Claude e Gemini — as IAs de imagem e vídeo seguem o que você escolheu acima)</label>
+      <select id="nCusto" style="width:100%">${CUSTOS.map(([v,t])=>`<option value="${v}">${t}</option>`).join("")}</select></div>
+    <div class="todo"><label>Ritmo dos clipes (quanto tempo cada cena fica na tela) — ads mais dinâmicos pedem clipes mais curtos</label>
+      <div class="modo" id="nRitmo">${RITMOS.map((r,k)=>`<label data-r="${k}" class="${k==1?"on":""}" onclick="nRitmo(${k})">${r.nome}<span>${r.desc}</span></label>`).join("")}</div>
+      <div id="nRitmoP" hidden style="margin-top:8px" class="acoes">de <input id="rMin" type="number" step="0.1" min="0.6" max="12" value="2" style="width:80px"> a
+        <input id="rMax" type="number" step="0.1" min="1" max="15" value="3" style="width:80px"> segundos por clipe</div></div>
+    <div class="todo"><label>Imagens de referência (recomendado: 2 ou mais — ex.: personagem de frente, personagem de corpo inteiro, produto)</label>
+      <div class="drop" id="dRef" onclick="$('#fRef').click()">Arraste as imagens aqui ou clique para escolher</div>
+      <input type="file" id="fRef" accept="image/*" multiple hidden onchange="nRefs(this.files);this.value=''">
+      <div class="refs" id="nRefs"></div><div class="aviso" id="avRef"></div></div>
+    <div><label id="lAudio">Áudio da locução (ou o vídeo com o áudio) — o SRT sai dele</label>
+      <div class="drop" id="dAud" onclick="$('#fAud').click()">Arraste o áudio aqui ou clique</div><input type="file" id="fAud" accept="audio/*,video/*" hidden onchange="nArq('audio',this.files[0])">
+      <div class="cinza peq" id="iAud" style="margin-top:6px"></div></div>
+    <div><label>SRT (opcional — só se quiser usar um seu em vez do automático)</label>
+      <div class="drop" id="dSrt" onclick="$('#fSrt').click()">Arraste o .srt aqui ou clique</div><input type="file" id="fSrt" accept=".srt" hidden onchange="nArq('srt',this.files[0])">
+      <div class="cinza peq" id="iSrt" style="margin-top:6px"></div></div>
+    <div class="todo"><label>Vídeo de referência (opcional) — um anúncio para servir de base. O editor estuda o vídeo, compara com a sua copy e aplica no nível que você escolher</label>
+      <div class="acoes"><div class="drop" id="dRV" onclick="$('#fRV').click()" style="flex:1">Arraste o vídeo de referência aqui ou clique</div>
+        <input type="file" id="fRV" accept="video/*" hidden onchange="nArq('refvideo',this.files[0])">
+        <select id="nNivel" style="max-width:420px">${NIVEIS.map(([v,t])=>`<option value="${v}">${t}</option>`).join("")}</select></div>
+      <div class="cinza peq" id="iRV" style="margin-top:6px"></div></div>
+    <div><label>Copy / roteiro <span id="lRot">(opcional na locução — ajuda o Claude; obrigatório na fala nativa sem SRT)</span></label><textarea id="nRot" rows="7" placeholder="Cole a copy do anúncio"></textarea></div>
+    <div><label>Notas de estilo e direção (opcional)</label><textarea id="nEst" rows="7" placeholder="ex.: estilo Pixar, cozinha clara, tons quentes; o personagem é um senhor de 60 anos; produto em pote branco…"></textarea></div>
+    <div class="todo acoes"><button class="pri" id="nIr" onclick="nCriar()">Criar e gerar as imagens</button><button onclick="location.href='/animado'">Cancelar</button><span id="nSt" class="cinza"></span></div>
+  </div></div>`;
+  for(const [el,tipo] of [["#dRef","ref"],["#dAud","audio"],["#dSrt","srt"],["#dRV","refvideo"]]){const d=$(el);
+    d.ondragover=e=>{e.preventDefault();d.classList.add("sobre")};d.ondragleave=()=>d.classList.remove("sobre");
+    d.ondrop=e=>{e.preventDefault();d.classList.remove("sobre");const fs=e.dataTransfer.files;tipo=="ref"?nRefs(fs):nArq(tipo,fs[0])}}
+  nDesenha();
+  fetch("/api/config").then(r=>r.json()).then(c=>{CFGN=c;
+    $("#nMI").innerHTML=(c.modelos_imagem||[]).map(m=>`<option value="${m.id}" ${m.id==c.gen_img?"selected":""}>${esc(m.nome)}</option>`).join("");
+    $("#nMV").innerHTML=(c.modelos_video||[]).map(m=>`<option value="${m.id}" ${m.id==c.gen_video?"selected":""}>${esc(m.nome)}${m.audio?" · com áudio":""}${m.final?" · quadro inicial e final":""}</option>`).join("");nAvisoAudio()});
+}
+let CFGN=null;
+function nAvisoAudio(){const m=(CFGN?.modelos_video||[]).find(x=>x.id==$("#nMV")?.value);if($("#avAud"))$("#avAud").textContent=N&&N.modo=="nativo"&&m&&!m.audio?"Esse modelo não gera áudio: na fala do personagem escolha um com áudio.":""}
+function nMont(m){N.montagem=m;document.querySelectorAll("#nMont label").forEach(l=>l.classList.toggle("on",l.dataset.mt==m))}
+function nModo(m){N.modo=m;document.querySelectorAll(".modo label[data-m]").forEach(l=>l.classList.toggle("on",l.dataset.m==m));
+  nAvisoAudio();$("#lAudio").textContent=m=="vo"?"Áudio da locução (ou o vídeo com o áudio) — o SRT sai dele":"Áudio (opcional — se tiver a fala gravada, o SRT sai dele)"}
+function nRefs(fs){for(const f of fs){if(!/^image\//.test(f.type))continue;if(N.refs.length>=8)break;
+  N.refs.push({f,tipo:N.refs.some(r=>r.tipo=="personagem")&&/prod|pack|pote|frasco/i.test(f.name)?"produto":"personagem",nota:"",url:URL.createObjectURL(f)})}nDesenha()}
+function nArq(tipo,f){if(!f)return;N[tipo]=f;nDesenha()}
+function nDesenha(){
+  $("#nRefs").innerHTML=N.refs.map((r,k)=>`<div class="ref"><img src="${r.url}"><div class="c">
+    <select onchange="N.refs[${k}].tipo=this.value">${["personagem","produto","estilo"].map(t=>`<option ${t==r.tipo?"selected":""}>${t}</option>`).join("")}</select>
+    <input placeholder="nota (opcional)" value="${esc(r.nota)}" oninput="N.refs[${k}].nota=this.value">
+    <button class="perigo" onclick="N.refs.splice(${k},1);nDesenha()">remover</button></div></div>`).join("");
+  $("#avRef").textContent=N.refs.length==1?"Com uma referência só funciona, mas o recomendado são duas ou mais (o personagem muda menos de rosto entre as cenas).":"";
+  $("#iAud").textContent=N.audio?`✓ ${N.audio.name}`:"";if($("#iRV"))$("#iRV").textContent=N.refvideo?`✓ ${N.refvideo.name}`:"";$("#iSrt").textContent=N.srt?`✓ ${N.srt.name}`:"";
+}
+async function nCriar(){
+  const st=$("#nSt");st.className="cinza";
+  try{
+    const nome=$("#nNome").value.trim();if(!nome)throw new Error("dê um nome ao ad");const ritmo=ritmoEscolhido(N.ritmo,$("#rMin").value,$("#rMax").value);
+    if(!N.refs.length)throw new Error("envie pelo menos uma imagem de referência");
+    if(N.modo=="vo"&&!N.audio)throw new Error("envie o áudio da locução");
+    if(N.modo=="nativo"&&!N.srt&&!N.audio&&!$("#nRot").value.trim())throw new Error("na fala nativa, cole o roteiro ou envie um SRT");
+    $("#nIr").disabled=true;const tot=N.refs.length+(N.audio?1:0)+(N.srt?1:0);let feitos=0;
+    const passo=n=>st.textContent=`enviando ${n}… (${feitos+1} de ${tot})`;
+    for(const [k,r] of N.refs.entries()){passo("referência "+(k+1));await sobe(`/api/animado/arquivo?id=${N.id}&tipo=ref&n=${k+1}&nome=${encodeURIComponent(r.f.name)}`,r.f);feitos++}
+    if(N.audio){await sobe(`/api/animado/arquivo?id=${N.id}&tipo=audio&nome=${encodeURIComponent(N.audio.name)}`,N.audio,p=>st.textContent=`enviando o áudio… ${Math.round(p*100)}%`);feitos++}
+    if(N.refvideo){await sobe(`/api/animado/arquivo?id=${N.id}&tipo=refvideo&nome=${encodeURIComponent(N.refvideo.name)}`,N.refvideo,p=>st.textContent=`enviando o vídeo de referência… ${Math.round(p*100)}%`)}
+    if(N.srt){passo("SRT");await sobe(`/api/animado/arquivo?id=${N.id}&tipo=srt&nome=${encodeURIComponent(N.srt.name)}`,N.srt);feitos++}
+    st.textContent="criando…";
+    const r=await post("/api/animado/criar",{id:N.id,nome,modo:N.modo,montagem:N.montagem||"cortes",ritmo,custo:$("#nCusto").value,ref_nivel:$("#nNivel").value,modelo_img:$("#nMI").value,modelo_video:$("#nMV").value,roteiro:$("#nRot").value,estilo:$("#nEst").value,refs:N.refs.map((r,k)=>({n:k+1,tipo:r.tipo,nota:r.nota}))});
+    location.href="/animado?id="+encodeURIComponent(r.id);
+  }catch(e){st.className="erro";st.textContent=e.message;$("#nIr").disabled=false}
+}
+
+// ---------------- projeto
+async function carrega(){
+  try{E=await (await fetch("/api/animado/estado?id="+encodeURIComponent(ID))).json()}catch(e){$("#app").innerHTML=`<div class="erro">não consegui abrir este projeto</div>`;return}
+  if(E.erro){$("#app").innerHTML=`<div class="erro">${esc(E.erro)}</div>`;return}
+  desenha();clearTimeout(timer);timer=setTimeout(carrega,E.estado.rodando?3000:15000);
+}
+function focoEmTexto(){const a=document.activeElement;return a&&(a.tagName=="TEXTAREA"||a.tagName=="INPUT")}
+let ULT_SIG="";
+function assinaturaE(){try{return JSON.stringify(Object.assign({},E,{estado:Object.assign({},E.estado,{log:null})}))+"|"+[...SEL].join(",")}catch(e){return Math.random()+""}}
+function tocandoVideo(){return [...document.querySelectorAll("#app video")].some(v=>!v.paused&&!v.ended)}
+function desenha(forcar){
+  if(focoEmTexto())return;                            // não apaga o que você está digitando
+  const sig=assinaturaE();
+  if(!forcar&&sig==ULT_SIG){                          // nada mudou: só atualiza o registro, sem redesenhar (a página não pula)
+    const lg=document.querySelector("#app details.registro pre");if(lg)lg.textContent=(E.estado.log||[]).join("\n");return}
+  if(!forcar&&tocandoVideo())return;                  // não interrompe o vídeo que você está assistindo
+  ULT_SIG=sig;
+  const app=$("#app"),y=window.scrollY;
+  const abertos=new Set([...app.querySelectorAll("details")].filter(x=>x.open).map(chaveDet));
+  app.style.minHeight=app.offsetHeight+"px";          // segura a altura enquanto as imagens recarregam
+  desenhaAgora();
+  app.querySelectorAll("details").forEach(x=>{if(abertos.has(chaveDet(x)))x.open=true});
+  window.scrollTo(0,y);
+  clearTimeout(desenha._t);desenha._t=setTimeout(()=>{app.style.minHeight=""},4000);
+}
+function abreClipe(src){const f=document.createElement("div");f.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99;display:flex;align-items:center;justify-content:center";
+  f.innerHTML=`<video src="${src}" controls autoplay playsinline style="max-width:92vw;max-height:88vh;border-radius:10px"></video>`;f.onclick=e=>{if(e.target==f){f.querySelector("video").pause();f.remove()}};document.body.appendChild(f)}
+function chaveDet(x){const b=x.closest("[id]");return (b?b.id:"")+"|"+((x.querySelector("summary")||{}).textContent||"")}
+function desenhaAgora(){
+  const st=E.estado,B=E.storyboard,beats=B.beats||[],P=E.pedido,rod=st.rodando,aprov=B.aprovado,rit=P.ritmo||{min:2,max:3};
+  const faseVid=!!aprov;
+  const refazer=beats.filter(b=>["refazer","erro"].includes(b.img_estado)).map(b=>b.n);
+  const refazerF=beats.filter(b=>b.quadro_final&&["refazer","erro"].includes(b.img_final_estado)).map(b=>b.n);
+  const cont=P.montagem=="continuo";
+  const semImg=(cont?beats.slice(0,1):beats).filter(b=>!b.img).length+beats.filter(b=>b.quadro_final&&!b.img_final).length;
+  const etapas=(st.etapas||[]).map(e=>`<div class="et ${e.estado}">${e.estado=="ok"?"✓ ":e.estado=="rodando"?"… ":e.estado=="erro"?"✕ ":""}${esc(e.nome)}${e.detalhe?`<small>${esc(e.detalhe)}</small>`:""}</div>`).join("");
+  let botoes="";
+  if(rod)botoes=`<button class="perigo" onclick="acao('cancelar')">Cancelar</button>`;
+  else{
+    if(st.status=="erro")botoes+=`<button class="pri" onclick="acao('retomar')">Retomar de onde parou</button>`;
+    if(beats.length&&!faseVid){
+      if(SEL.size)botoes+=`<button onclick="refazerSel()">Refazer as ${SEL.size} selecionadas</button>`;
+      if(refazer.length||refazerF.length)botoes+=`<button onclick="acao('refazer',{nums:${JSON.stringify(refazer)},finais:${JSON.stringify(Object.fromEntries(refazerF.map(n=>[n,""])))}})">Refazer as marcadas pelo Claude (${refazer.length+refazerF.length})</button>`;
+      if(beats.some(b=>b.img))botoes+=`<button onclick="acao('validar')">Conferir todas de novo</button>`;
+      if(!semImg&&beats.length)botoes+=`<button class="ok" onclick="aprovar()">Aprovar imagens e gerar os vídeos</button><span class="cinza peq">${beats.length} clipes em ${esc((E.modelos_video.find(m=>m.id==E.modelo_video)||{}).nome||"")}${E.modelo_video=="grok"?(E.assinatura?" (cota semanal)":` · ~${usd(E.estimativa_video)}`):" (créditos da KIE)"}</span>`;
+    }
+    if(faseVid){
+      if(SEL.size)botoes+=`<button onclick="refazerVidSel()">Refazer os ${SEL.size} vídeos selecionados</button>`;
+      if(beats.some(b=>b.video_estado=="erro"))botoes+=`<button onclick="acao('refazer_video',{nums:${JSON.stringify(beats.filter(b=>b.video_estado=="erro").map(b=>b.n))}})">Refazer os vídeos com erro</button>`;
+      if(beats.some(b=>b.video||b.img)&&aprov)botoes+=`<button onclick="acao('montar')">Montar a timeline de novo</button>`;
+      botoes+=`<button onclick="voltarImagens()">Voltar para as imagens</button>`;
+    }
+    botoes+=`<button class="perigo" onclick="apagar()">Apagar</button>`;
+  }
+  const locks=B.locks?`<details class="locks"><summary>Storyboard: locks, pares espelhados e notas</summary>
+    ${[["AVATAR LOCK",B.locks.avatar],["B-ROLL LOCK",B.locks.broll],["PACKSHOT LOCK",B.locks.packshot],["MOTION LOCK",B.motion_lock]].filter(x=>x[1]).map(([t,v])=>`<b class="peq">${t}</b><pre>${esc(v)}</pre>`).join("")}
+    ${B.hook?`<p><b>Conceito do hook:</b> ${esc(B.hook)}</p>`:""}
+    ${B.revisao?`<p><b>Revisão do diretor de criação:</b> hook ${B.revisao.nota_hook}/10 · corpo ${B.revisao.nota_corpo}/10 · produto ${B.revisao.nota_produto}/10${B.revisao.reescritos.length?` · reescreveu os beats ${B.revisao.reescritos.map(n=>String(n).padStart(2,"0")).join(", ")}`:""}<br><span class="cinza">${esc(B.revisao.critica)}</span></p>`:""}
+    ${B.produto_detalhe?`<b class="peq">PRODUTO</b><pre>${esc(B.produto_detalhe)}</pre>`:""}
+    ${B.regra_de_ouro?`<p><b>Regra de ouro:</b> ${esc(B.regra_de_ouro)}</p>`:""}
+    ${(B.pares_espelhados||[]).length?`<p><b>Pares espelhados:</b> ${B.pares_espelhados.map(esc).join(" · ")}</p>`:""}
+    ${(B.cenarios_repetidos||[]).length?`<p><b>Cenários que repetem:</b> ${B.cenarios_repetidos.map(esc).join(" · ")}</p>`:""}
+    ${[...(B.notas||[]),...(B.notas_animacao||[])].map(n=>`<p class="cinza">• ${esc(n)}</p>`).join("")}</details>`:"";
+  const tl=E.timeline;
+  const timeline=tl&&tl.clipes?`<div class="timeline">${tl.clipes.map(c=>{const b=beats.find(x=>x.n==c.n)||{};return `<div title="${esc(`${String(c.n).padStart(2,"0")} · ${tc(c.ini)}–${tc(c.fim)} · ${c.texto}`)}" onclick="document.getElementById('b${c.n}').scrollIntoView({behavior:'smooth',block:'center'})"
+    style="flex:${Math.max(.05,c.fim-c.ini)};${b.img_abs?`background-image:url('${arq(b.img_abs)}')`:""}"><span>${String(c.n).padStart(2,"0")}</span></div>`}).join("")}</div>`:"";
+  $("#app").innerHTML=`
+  <div class="painel"><div class="acoes" style="justify-content:space-between"><h3 style="margin:0">${esc(P.nome)} <span class="selo ${esc(st.status)}">${esc(rotStatus(st.status))}</span></h3>
+    <span class="cinza peq">${P.modo=="nativo"?"fala nativa do personagem":"locução (VO)"} · ${P.montagem=="continuo"?"contínuo (plano-sequência) · ":""}${beats.length} beats · ritmo ${num(rit.min)}–${num(rit.max)} s por clipe
+      ${rod?"":`<a href="#" onclick="mudarRitmo();return false">mudar</a>`} · gasto ${usd(E.custo.total)} (Claude ${usd(E.custo.claude)}${E.custo.grok?` · IA generativa ${usd(E.custo.grok)}`:(E.assinatura&&[E.modelo_img,E.modelo_video].includes("grok")?" · Grok pela assinatura":"")})</span></div>
+    <div class="acoes peq" style="margin-top:10px">IA das imagens <select ${rod?"disabled":""} onchange="trocaModelo('modelo_img',this.value)">${E.modelos_imagem.map(m=>`<option value="${m.id}" ${m.id==E.modelo_img?"selected":""}>${esc(m.nome)}</option>`).join("")}</select>
+      IA dos vídeos <select ${rod?"disabled":""} onchange="trocaModelo('modelo_video',this.value)">${E.modelos_video.map(m=>`<option value="${m.id}" ${m.id==E.modelo_video?"selected":""}>${esc(m.nome)}${m.audio?" · com áudio":""}${m.final?" · quadro inicial e final":""}</option>`).join("")}</select>
+      <span class="cinza">trocar vale para as próximas gerações (e para o que você refizer)</span></div>
+    <div class="acoes peq" style="margin-top:6px">Uso de API <select ${rod?"disabled":""} onchange="trocaCusto(this.value)">${CUSTOS.map(([v,t])=>`<option value="${v}" ${v==(P.custo||"livre")?"selected":""}>${t}</option>`).join("")}</select></div>
+    <div class="etapas" style="margin-top:12px">${etapas}</div>
+    ${st.mensagem?`<p class="${st.status=="erro"?"erro":""}" style="margin:0 0 10px">${esc(st.mensagem)}</p>`:""}
+    <div class="acoes">${botoes}</div>
+    ${!faseVid&&beats.some(b=>b.img)?`<p class="cinza peq" style="margin:10px 0 0">Clique numa imagem para selecionar. Você pode editar o prompt de qualquer beat antes de refazer — se não editar, o Claude usa o prompt corrigido que ele mesmo sugeriu.</p>`:""}
+  </div>
+  ${E.final?`<div class="painel"><h3>Vídeo montado</h3><div class="final"><video src="${arq(E.final)}#t=0.1" preload="metadata" controls playsinline></video>
+    <div class="acoes" style="flex-direction:column;align-items:flex-start"><a href="${arq(E.final)}" download><button class="pri">Baixar o vídeo</button></a>
+    ${E.srt?`<a href="${arq(E.srt)}" download><button>Baixar o SRT</button></a>`:""}
+    <span class="cinza peq">${tl?`${tl.clipes.length} clipes · ${tc(tl.dur)}`:""}</span></div></div>${timeline}</div>`:""}
+  ${P.referencia_abs?`<div class="painel"><h3>Vídeo de referência</h3><div class="final"><video src="${arq(P.referencia_abs)}#t=0.1" preload="metadata" controls playsinline style="height:360px"></video>
+    <div style="flex:1;min-width:260px">${B.referencia?`<p><b>Semelhança com a copy: ${B.referencia.nota}/5</b> — ${esc(B.referencia.justificativa)}</p>
+      <p>Aplicando no <b>nível ${B.referencia.nivel}</b>${P.ref_nivel=="auto"?" (automático)":" (escolhido por você)"}: <span class="cinza">${esc((NIVEIS.find(n=>n[0]==String(B.referencia.nivel))||[])[1]||"")}</span></p>
+      <p class="cinza peq">${esc(B.referencia.analise?.resumo||"")}</p>`:`<p class="cinza">Ainda não estudado.</p>`}
+      ${rod?"":`<div class="acoes">Mudar o nível <select onchange="mudarNivel(this.value)">${NIVEIS.map(([v,t])=>`<option value="${v}" ${v==(P.ref_nivel||"auto")?"selected":""}>${t}</option>`).join("")}</select></div>`}
+      ${B.referencia?`<div class="hist" style="flex-wrap:wrap;margin-top:10px">${(B.referencia.cenas||[]).map((c,k)=>c.quadro_abs?`<img title="${esc(`cena ${k+1}: ${c.o_que}`)}" src="${arq(c.quadro_abs)}" style="width:54px;height:96px">`:"").join("")}</div>`:""}
+    </div></div></div>`:""}
+  <div class="painel"><h3>Referências</h3><div class="refs">${P.refs.map((r,k)=>`<div class="ref"><img src="${arq(r.abs)}"><div class="c"><b>${k+1} · ${esc(r.tipo)}</b>${r.nota?`<span class="cinza">${esc(r.nota)}</span>`:""}</div></div>`).join("")}</div>
+    ${P.audio_abs?`<audio src="${arq(P.audio_abs)}" controls style="margin-top:10px;width:100%;max-width:520px"></audio>`:""}${locks}</div>
+  <div class="beats">${beats.map(b=>cardBeat(b,faseVid,rod)).join("")}</div>
+  <div class="painel" style="margin-top:18px"><details class="registro"><summary>Registro</summary><pre>${esc((st.log||[]).join("\n"))}</pre></details></div>`;
+}
+function cardBeat(b,faseVid,rod){
+  const n2=String(b.n).padStart(2,"0"),v=b.validacao;
+  const gerando=b.img_estado=="gerando"||b.video_estado=="gerando";
+  const midia=faseVid&&b.video_abs?`<video src="${arq(b.video_abs)}" preload="none" muted loop playsinline onmouseenter="this.play().catch(()=>{})" onmouseleave="this.pause()" ondblclick="event.stopPropagation();abreClipe(this.src)" title="passe o mouse para ver · dois cliques para abrir com som" poster="${arq(b.img_abs||b.frame_abs)}"></video>`
+    :(b.img_abs||b.frame_abs)?`<img src="${arq(b.img_abs||b.frame_abs)}" loading="lazy">`:`<span>${b.img_estado=="erro"?"erro":"sem imagem"}</span>`;
+  let ver="";
+  if(!faseVid){
+    if(b.img_estado=="erro")ver=`<div class="veredito falha">Falhou: ${esc(b.img_erro)}</div>`;
+    else if(v&&v.ok)ver=`<div class="veredito bom">✓ Claude aprovou</div>`;
+    else if(v&&!v.ok)ver=`<div class="veredito ruim">Refazer: ${esc(v.problemas)}</div>`;
+  }else{
+    if(b.video_estado=="erro")ver=`<div class="veredito falha">Vídeo falhou: ${esc(b.video_erro)}</div>`;
+    else if(b.video_estado=="ok")ver=`<div class="veredito bom">✓ vídeo pronto · corte ${(b.corte||0).toFixed(2).replace(".",",")}s · render ${b.render}s</div>`;
+  }
+  const campo=faseVid?"anim":"prompt",valor=EDIT[b.n+campo]??(faseVid?(b.anim||""):(b.prompt||""));
+  const podeEditar=!rod&&(faseVid?!!b.anim:!!b.prompt);
+  const cont=E.pedido.montagem=="continuo",filho=cont&&b.n>E.storyboard.beats[0].n;
+  if(filho&&!faseVid){                                  // contínuo: este beat nasce do vídeo anterior
+    return `<div class="beat" id="b${b.n}"><div class="midia">${b.frame_abs?`<img src="${arq(b.frame_abs)}">`:`<span class="peq" style="padding:12px;text-align:center">continua do último quadro do vídeo ${String(b.n-1).padStart(2,"0")}</span>`}<span class="num">${n2}</span>${b.trilho?`<span class="tr ${b.trilho}">${b.trilho=="BROLL"?"B-ROLL":b.trilho}</span>`:""}</div>
+      <div class="corpo"><div class="tc">${tc(b.ini)} → ${tc(b.fim)}</div><div class="fala">${esc(b.texto)}</div>${b.ideia?`<div class="cinza">${esc(b.ideia)}</div>`:""}${blocoFinal(b,false)}</div></div>`}
+  return `<div class="beat ${!faseVid&&b.img_estado=="refazer"?"refazer":""} ${(b.img_estado=="erro"&&!faseVid)||(faseVid&&b.video_estado=="erro")?"erro":""} ${SEL.has(b.n)?"sel":""}" id="b${b.n}">
+    <div class="midia" onclick="${rod?"":`sel(${b.n})`}">${midia}<span class="num">${n2}</span>${b.trilho?`<span class="tr ${b.trilho}">${b.trilho=="BROLL"?"B-ROLL":b.trilho}</span>`:""}
+      ${SEL.has(b.n)?`<span class="chk">✓ selecionado</span>`:""}${gerando?`<div class="gerando">gerando…</div>`:""}</div>
+    <div class="corpo"><div class="tc">${tc(b.ini)} → ${tc(b.fim)} · ${((b.fim||0)-(b.ini||0)).toFixed(2).replace(".",",")}s</div>
+      <div class="fala">${b.papel&&b.papel!="CORPO"?`<span class="selo ${b.papel=="HOOK"?"aguardando":"pronto"}">${esc(b.papel)}</span> `:""}${esc(b.texto)}</div>${b.ideia?`<div class="cinza">${esc(b.ideia)}</div>`:""}${b.ref_cena&&E.storyboard.referencia?`<div class="cinza peq">↔ cena ${b.ref_cena} da referência${b.ref_como?`: ${esc(b.ref_como)}`:""}</div>`:""}${b.porque?`<div class="cinza peq">↳ ${esc(b.porque)}</div>`:""}${ver}
+      ${b.prompt||b.anim?`<details ${EDIT[b.n+campo]!==undefined?"open":""}><summary>${faseVid?"prompt de animação":"prompt da imagem"}</summary>
+        <textarea ${podeEditar?"":"disabled"} oninput="EDIT['${b.n}${campo}']=this.value">${esc(valor)}</textarea>
+        ${podeEditar?`<div class="acoes" style="margin-top:6px">${faseVid?`<button onclick="refazerVid(${b.n})">Refazer este vídeo</button>`
+          :`<button onclick="refazerUm(${b.n})">Refazer esta imagem</button><button onclick="salvarPrompt(${b.n})">Só salvar</button>`}</div>`:""}</details>`:""}
+      ${blocoFinal(b,faseVid)}
+      ${!faseVid&&(b.historico_abs||[]).length?`<div class="hist" title="versões anteriores">${b.historico_abs.map(h=>`<img src="${arq(h)}">`).join("")}</div>`:""}
+    </div></div>`;
+}
+function mudarNivel(v){if(confirm("Mudar o nível de uso da referência refaz o storyboard e as imagens do zero. Continuar?"))acao("nivel_ref",{ref_nivel:v});else carrega()}
+async function trocaCusto(v){try{await post("/api/animado/acao?id="+encodeURIComponent(ID),{acao:"custo",custo:v});await carrega()}catch(e){alerta(e.message);carrega()}}
+async function trocaModelo(campo,valor){try{await post("/api/animado/acao?id="+encodeURIComponent(ID),{acao:"modelos",[campo]:valor});await carrega()}catch(e){alerta(e.message);carrega()}}
+function blocoFinal(b,faseVid){
+  if(!b.quadro_final)return "";
+  const rod=E.estado.rodando,v=b.validacao_final,t=b.continuidade=="TRANSICAO";
+  const ver=b.img_final_estado=="erro"?`<div class="veredito falha">Falhou: ${esc(b.img_final_erro||"")}</div>`:v&&v.ok?`<div class="veredito bom">✓ Claude aprovou o quadro final</div>`:v&&!v.ok?`<div class="veredito ruim">Refazer: ${esc(v.problemas)}</div>`:"";
+  const val=EDIT[b.n+"final"]??b.quadro_final;
+  return `<div style="border-top:1px solid var(--linha);padding-top:8px;margin-top:4px"><b class="peq">${t?"TRANSIÇÃO → novo ambiente":"QUADRO FINAL (alvo)"}</b>${t&&b.transicao?`<div class="cinza peq">${esc(b.transicao)}</div>`:""}
+    ${b.final_abs?`<img src="${arq(b.final_abs)}" style="width:100%;border-radius:8px;margin-top:6px;aspect-ratio:9/16;object-fit:cover">`:`<div class="cinza peq">${b.img_final_estado=="gerando"?"gerando…":"ainda sem imagem"}</div>`}
+    ${faseVid?"":ver}${faseVid?"":`<details><summary>prompt do quadro final</summary><textarea ${rod?"disabled":""} oninput="EDIT['${b.n}final']=this.value">${esc(val)}</textarea>
+    ${rod?"":`<div class="acoes" style="margin-top:6px"><button onclick="refazerFinal(${b.n})">Refazer o quadro final</button></div>`}</details>`}</div>`}
+function refazerFinal(n){const t=EDIT[n+"final"];acao("refazer",{nums:[],finais:{[n]:t||""}})}
+function sel(n){SEL.has(n)?SEL.delete(n):SEL.add(n);desenha()}
+async function acao(a,extra={}){try{await post("/api/animado/acao?id="+encodeURIComponent(ID),{acao:a,...extra});SEL.clear();EDIT={};await carrega()}catch(e){alerta(e.message)}}
+function alerta(m){const p=document.createElement("div");p.className="painel erro";p.textContent=m;$("#app").prepend(p);setTimeout(()=>p.remove(),7000)}
+function promptsEditados(campo){const o={};for(const [k,v] of Object.entries(EDIT))if(k.endsWith(campo))o[parseInt(k)]=v;return o}
+function refazerUm(n){acao("refazer",{nums:[n],prompts:promptsEditados("prompt")})}
+function refazerSel(){acao("refazer",{nums:[...SEL],prompts:promptsEditados("prompt")})}
+async function salvarPrompt(n){const o=promptsEditados("prompt");if(!(n in o))return;await acao("editar",{prompts:{[n]:o[n]}})}
+function refazerVid(n){if(confirm(E.pedido.montagem=="continuo"?`Ad contínuo: refazer o vídeo ${String(n).padStart(2,"0")} refaz também todos os seguintes (eles continuam deste). Continuar?`:"Refazer este vídeo? Ele é gerado de novo (custa de novo) e a timeline é montada outra vez."))acao("refazer_video",{nums:[n],prompts:promptsEditados("anim")})}
+function refazerVidSel(){if(confirm(`Refazer ${SEL.size} vídeos? Cada um custa de novo.`))acao("refazer_video",{nums:[...SEL],prompts:promptsEditados("anim")})}
+function aprovar(){if(confirm(`Aprovar as imagens e gerar os vídeos?\n\n${E.storyboard.beats.length} clipes em ${(E.modelos_video.find(m=>m.id==E.modelo_video)||{}).nome||""} — ${E.modelo_video!="grok"?"usa créditos da sua conta KIE.":E.assinatura?"sai da cota semanal da sua assinatura do Grok.":`estimativa: ~${usd(E.estimativa_video)}.`}`))acao("aprovar")}
+function mudarRitmo(){
+  const atual=E.pedido.ritmo||{min:2,max:3};
+  const txt=prompt(`Novo ritmo em segundos por clipe (mínimo a máximo). Ex.: 1-2 (bem dinâmico), 2-3 (dinâmico), 3-4 (normal), 4-6 (calmo).\n\nAtenção: os beats são refeitos do zero — o storyboard, as imagens e os vídeos atuais deixam de valer.`,`${num(atual.min)}-${num(atual.max)}`);
+  if(!txt)return;const m=txt.replace(/,/g,".").match(/([\d.]+)\s*[-a–]+\s*([\d.]+)/);if(!m){alerta("use o formato 2-3");return}
+  acao("ritmo",{ritmo:{min:parseFloat(m[1]),max:parseFloat(m[2])}})}
+const num=v=>String(Math.round((v||0)*10)/10).replace(".",",");
+function voltarImagens(){if(confirm("Voltar para a etapa das imagens? Os vídeos já gerados ficam guardados; ao aprovar de novo, só os beats sem vídeo (ou com imagem nova) são gerados outra vez."))acao("voltar")}
+async function apagar(){if(confirm("Apagar este ad animado com todas as imagens e vídeos? Não dá para desfazer."))
+  {try{await post("/api/animado/acao?id="+encodeURIComponent(ID),{acao:"apagar"});location.href="/animado"}catch(e){alerta(e.message)}}}
+
+if(ID){$("#btNovo").onclick=()=>location.href="/animado?novo=1";carrega()}
+else if(new URLSearchParams(location.search).get("novo"))abrirNovo();
+else lista();
+
+// ---------------- configurações
+let CFG={};
+function opts(lista,sel,extra){return (lista||[]).map(m=>`<option value="${m.id}" ${m.id==sel?"selected":""}>${esc(m.nome)}${extra?extra(m):""}</option>`).join("")}
+function ph(c,base){return c&&c.ok?(c.detectada?`achei a sua chave neste computador (${c.final}) · cole outra para trocar`:`configurada (${c.final}) · cole outra para trocar`):base}
+async function abrirCfg(){CFG=await (await fetch("/api/config")).json();mostraCfg();document.querySelectorAll("#cfg .st").forEach(x=>{x.textContent="";x.className="st"});$("#cfg").classList.add("on")}
+function fecharCfg(){$("#cfg").classList.remove("on")}
+function mostraCfg(){
+  ["kA","kT","kX","kK","kG","kO"].forEach(i=>$("#"+i).value="");
+  $("#cAuth").innerHTML=opts(CFG.auths_claude,CFG.claude_auth);mostraAuthClaude();
+  $("#kA").placeholder=ph(CFG.anthropic,"sk-ant-…");$("#kT").placeholder=ph(CFG.claude_token,"sk-ant-oat…");$("#mod").innerHTML=opts(CFG.modelos,CFG.modelo);
+  $("#genA").innerHTML=opts(CFG.auths,CFG.gen_auth);$("#linX").hidden=CFG.gen_auth!="api";$("#kX").placeholder=ph(CFG.xai,"xai-…");$("#genM").innerHTML=opts(CFG.modelos_img,CFG.gen_modelo_img);
+  if(CFG.gen_auth=="assinatura")$("#stX").textContent=CFG.assinatura_ok?"login do Grok encontrado neste computador":"não achei o login do Grok: rode `grok` no Terminal uma vez e entre com a sua conta";
+  $("#kK").placeholder=ph(CFG.kie,"chave da KIE…");
+  $("#genI").innerHTML=opts(CFG.modelos_imagem,CFG.gen_img);$("#genV").innerHTML=opts(CFG.modelos_video,CFG.gen_video,m=>(m.audio?" · com áudio":"")+(m.final?" · quadro inicial e final":""));
+  $("#genR").innerHTML=opts(CFG.resolucoes,CFG.gen_resolucao);
+  $("#kG").placeholder=ph(CFG.gemini,"AIza…");$("#kO").placeholder=ph(CFG.openrouter,"sk-or-…");$("#gGratis").checked=!!CFG.gemini_gratis;$("#modG").innerHTML=opts(CFG.modelos_gemini,CFG.modelo_gemini);
+  $("#cfgPasta").textContent=CFG.pasta?"Os ads ficam em "+CFG.pasta:"";
+}
+function mostraAuthClaude(){const a=$("#cAuth").value=="assinatura";$("#linA").hidden=a;$("#linT").hidden=!a}
+async function salvarCfg(fecha){
+  CFG=Object.assign(await post("/api/config",{claude_auth:$("#cAuth").value,claude_token:$("#kT").value.trim(),anthropic:$("#kA").value.trim(),modelo:$("#mod").value,
+    gen_auth:$("#genA").value,xai:$("#kX").value.trim(),gen_modelo_img:$("#genM").value,kie:$("#kK").value.trim(),gen_img:$("#genI").value,gen_video:$("#genV").value,gen_resolucao:$("#genR").value,
+    gemini:$("#kG").value.trim(),openrouter:$("#kO").value.trim(),gemini_gratis:$("#gGratis").checked,modelo_gemini:$("#modG").value}),{pasta:CFG.pasta});
+  mostraCfg();if(fecha)fecharCfg();
+}
+async function testar(qual){
+  const st={anthropic:"#stA",xai:"#stX",kie:"#stK",gemini:"#stG",openrouter:"#stG"}[qual];$(st).className="st";$(st).textContent="testando…";
+  try{await salvarCfg(false);const r=await post("/api/config/testar?qual="+qual);$(st).className="st "+(r.ok?"ok":"no");$(st).textContent=r.msg}
+  catch(e){$(st).className="st no";$(st).textContent=e.message}
+}
+async function abrirCustos(){
+  const C=await (await fetch("/api/custos")).json(),T=C.total;clearTimeout(timer);
+  $("#app").innerHTML=`<div class="painel"><div class="acoes" style="justify-content:space-between"><h3 style="margin:0">Custos</h3><button onclick="location.href='/'">Voltar</button></div>
+    <p class="cinza peq">Claude e Grok pela assinatura não cobram por uso (aparecem como US$ 0). KIE é estimado pelos créditos.</p>
+    <table class="tab"><thead><tr><th>Ad</th><th>Criado</th><th class="n">Claude</th><th class="n">Gemini</th><th class="n">Grok</th><th class="n">KIE</th><th class="n">Total</th></tr></thead><tbody>
+    ${C.ads.map(a=>`<tr><td><a href="/animado?id=${encodeURIComponent(a.id)}" style="color:var(--txt)">${esc(a.nome)}</a></td><td class="cinza">${esc((a.criado||"").slice(0,10))}</td>
+      <td class="n">${usd(a.resumo.claude)}</td><td class="n">${usd(a.resumo.gemini)}</td><td class="n">${usd(a.resumo.grok)}</td><td class="n">${usd(a.resumo.kie)}</td><td class="n"><b>${usd(a.resumo.total)}</b></td></tr>`).join("")||`<tr><td colspan="7" class="cinza">nenhum ad ainda</td></tr>`}
+    </tbody><tfoot><tr><td><b>Total</b></td><td></td><td class="n">${usd(T.claude)}</td><td class="n">${usd(T.gemini)}</td><td class="n">${usd(T.grok)}</td><td class="n">${usd(T.kie)}</td><td class="n"><b>${usd(T.total)}</b></td></tr></tfoot></table></div>`;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+# Ad Animado (Python 3.12)
+anthropic==1.7.0
+claude-agent-sdk==0.2.157
+faster-whisper==1.2.1
