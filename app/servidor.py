@@ -424,7 +424,7 @@ def criar_ugc(d):
                resolucao=d.get("resolucao") if d.get("resolucao") in ("360p", "720p", "1080p", "4k") else "720p",
                broll=bool(d.get("broll")), modelo_img=m_img, modelo_broll=m_broll, rosto_novo=str(d.get("rosto_novo") or "").strip()[:600],
                pedido_avatar=str(d.get("pedido_avatar") or "").strip()[:600], marca=str(d.get("marca") or "").strip()[:80],
-               obs=str(d.get("obs") or "").strip()[:2000], avatar=None, produto=None, referencia=None, cenas=[], criado=time.strftime("%Y-%m-%d %H:%M:%S"))
+               obs=str(d.get("obs") or "").strip()[:2000], idioma=UGC.R.detectar_idioma(roteiro), avatar=None, produto=None, referencia=None, cenas=[], criado=time.strftime("%Y-%m-%d %H:%M:%S"))
     exigir_ugc(dict(ped, cenas=[dict(trocar=algum_troca)]))
     p = os.path.join(ugcs(), slug_nome(nome))
     if os.path.exists(p): raise ValueError(f"já existe um UGC chamado '{nome}'")
@@ -520,6 +520,7 @@ def acao_ugc(slug, d):
             for k in alvo: pl.item(k)
         exigir_ugc(ped, videos=True); lancar_ugc(p, "videos", alvo or None); return dict(ok=True)
     if acao == "montar": lancar_ugc(p, "montar"); return dict(ok=True)
+    if acao == "remontar": UGC.remontar(p, ped, pl); return dict(ok=True)
     raise ValueError("ação inválida")
 
 def zip_ugc(slug, so_aprovados):

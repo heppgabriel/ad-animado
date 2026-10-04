@@ -2,11 +2,27 @@
 Os blocos travados (LOCKS) entram no prompt LITERALMENTE pelo código: o Claude só escreve o que muda de clipe
 para clipe (cena, beats, negativas específicas). Assim a estrutura, a voz e as travas nunca variam."""
 
-TAXAS = {"calmo": 2.35, "rapido": 2.9}                  # palavras por segundo em pt-BR (acima de 2,6 embola)
+TAXAS = {"calmo": 2.35, "rapido": 2.9}                  # palavras por segundo (pt-BR; em inglês vale o mesmo, um pouco mais folgado)
 DURACOES = (4, 6, 8, 10)                                # o Omni Flash gera 4, 6, 8 ou 10 s
 
 LANGUAGE_LOCK = ("LANGUAGE LOCK: All spoken dialogue MUST be in Brazilian Portuguese (pt-BR). Do NOT speak English. "
                  "Do NOT translate the dialogue.")
+IDIOMAS = {"pt": dict(nome="Brazilian Portuguese (pt-BR)", outro="English"), "en": dict(nome="American English", outro="Portuguese"),
+           "es": dict(nome="Latin American Spanish", outro="English")}
+
+def language_lock(idioma):
+    if idioma == "pt": return LANGUAGE_LOCK
+    i = IDIOMAS.get(idioma, IDIOMAS["en"])
+    return f"LANGUAGE LOCK: All spoken dialogue MUST be in {i['nome']}. Do NOT speak any other language. Do NOT translate the dialogue."
+
+def detectar_idioma(texto):
+    """pt / en / es pelo vocabulário mais comum (o roteiro nunca é traduzido: só decide as travas de idioma)."""
+    import re
+    ws = re.findall(r"[a-záàâãéêíóôõúçñ]+", texto.lower())
+    pt = sum(w in {"você", "não", "que", "é", "eu", "uma", "com", "para", "isso", "mais", "meu", "minha", "tem", "está", "mas", "pra", "também"} for w in ws)
+    en = sum(w in {"the", "you", "and", "is", "your", "it", "this", "that", "with", "for", "are", "my", "was", "what", "of", "to"} for w in ws)
+    es = sum(w in {"usted", "tú", "qué", "es", "una", "con", "para", "esto", "más", "pero", "está", "también", "los", "las", "muy"} for w in ws)
+    return max((pt, "pt"), (en, "en"), (es, "es"))[1]
 
 def completeness_lock(pron):
     return (f"COMPLETENESS LOCK — CRITICAL: {pron['S']} must speak the ENTIRE dialogue line below, word for word, from the very first "
@@ -41,16 +57,17 @@ def camera_selfie(pron, enquadramento):
             "of drift, barely perceptible. No walking, no reframing, no panning, no tilting, no push-in. One continuous take, no "
             "cuts, no zooms.")
 
-def audio_fala(pron, voz, ambiencia, fala):
+def audio_fala(pron, voz, ambiencia, fala, idioma="pt"):
+    i = IDIOMAS.get(idioma, IDIOMAS["pt"])
     return (f"Audio: {voz}. Close, slightly compressed voice recording, {ambiencia}. Natural speech rhythm with small pauses. "
-            f"{pron['S']} speaks in Brazilian Portuguese (pt-BR) only, never English, and says every word below exactly as written, "
+            f"{pron['S']} speaks in {i['nome']} only, never {i['outro']}, and says every word below exactly as written, "
             f"finishing the final word before the clip ends:\n\"{fala}\"")
 
 def audio_mudo(ambiencia):
     return f"Audio: No voice, no dialogue, no speech of any kind. Only quiet room tone — {ambiencia}, one faint breath."
 
-def do_not(pron, extra):
-    base = (f"Do not: No English speech. No text overlays, captions, subtitles or logos. {pron['P']} face and body must stay identical "
+def do_not(pron, extra, idioma="pt"):
+    base = (f"Do not: No {IDIOMAS.get(idioma, IDIOMAS['pt'])['outro']} speech. No text overlays, captions, subtitles or logos. {pron['P']} face and body must stay identical "
             "to @image1 in every frame — no face morphing, no body morphing, no change in " + pron['P'].lower() + " build, shoulders or "
             f"proportions, no identity drift, no swapping to a different {pron['pessoa']}, no beautifying. No warped hands or extra "
             f"fingers. {pron['S']} stays in the same position: no standing, no leaning in or out, no turning, no repositioning. Do not "

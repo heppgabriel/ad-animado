@@ -172,9 +172,10 @@ def montar_prompt(clipe, desc, ped, plano):
     pron = R.PRONOMES.get(desc.get("genero") or "f", R.PRONOMES["f"]); nome = (ped.get("personagem") or {}).get("nome") or "ANA"
     mudo = clipe.get("tipo") == "escuta" or not clipe.get("fala", "").strip()
     dur = int(clipe["dur"]); b = []
+    idioma = ped.get("idioma") or R.detectar_idioma(ped.get("roteiro") or clipe.get("fala") or "")
     b.append(f"9:16 vertical. {dur} seconds. Single continuous shot. Realistic amateur UGC video.")
     if mudo: b.append(R.no_speech_lock(pron))
-    else: b += [R.LANGUAGE_LOCK, R.completeness_lock(pron)]
+    else: b += [R.language_lock(idioma), R.completeness_lock(pron)]
     b.append(R.identity_lock(nome.upper(), pron, limpa(desc.get("tracos") or "same face, same hair, same clothes")))
     cena = limpa(desc.get("cenario") or "Same setting and posture as @image1.")
     mexe = limpa(desc.get("pode_mexer") or "")
@@ -191,8 +192,8 @@ def montar_prompt(clipe, desc, ped, plano):
     amb = desc.get("ambiencia") or "quiet indoor room tone"
     if mudo: b.append(R.audio_mudo(amb)); b.append(R.do_not_mudo(pron, limpa(clipe.get("nao_extra"))))
     else:
-        b.append(R.audio_fala(pron, limpa(plano.get("voz") or "Natural warm Brazilian Portuguese voice, casual conversational tone"), amb, clipe["fala"]))
-        b.append(R.do_not(pron, limpa(clipe.get("nao_extra"))))
+        b.append(R.audio_fala(pron, limpa(plano.get("voz") or "Natural warm voice, casual conversational tone"), amb, clipe["fala"], idioma))
+        b.append(R.do_not(pron, limpa(clipe.get("nao_extra")), idioma))
     return "\n\n".join(x for x in b if x)
 
 def remontar(d, ped, pl, so_cena=None):
@@ -334,6 +335,7 @@ def etapa_plano(d, ped, pl, est):
     if ped.get("produto"): conteudo += [ia.texto(f"PRODUTO (marca: {ped.get('marca') or '-'}):"), ia.imagem(mini(d, os.path.join(d, ped["produto"]), 512))]
     conteudo.append(ia.texto(
         f"Personagem: {(ped.get('personagem') or {}).get('nome') or 'ANA'}. Voz pedida pelo usuário: {(ped.get('personagem') or {}).get('voz') or '(você escolhe)'}.\n"
+        f"Idioma da fala: {R.IDIOMAS.get(ped.get('idioma') or R.detectar_idioma(ped['roteiro']), R.IDIOMAS['pt'])['nome']} (a voz tem que ser descrita nesse idioma).\n"
         f"Ritmo de fala: {ped.get('taxa') or 'calmo'} ({taxa} palavras/s).\nB-ROLL: {'LIGADO' if ped.get('broll') else 'desligado (não proponha)'}.\n"
         f"Observações do usuário: {ped.get('obs') or '-'}\n\nCLIPES (falas travadas):\n" +
         "\n".join(f"{c['n']:02d} · {c['dur']} s · {c['palavras']} palavras · \"{c['fala']}\"" for c in pacote)))
