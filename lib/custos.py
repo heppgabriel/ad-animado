@@ -40,11 +40,11 @@ def nota(d, texto):
         C = ler(d)
         if texto not in C.setdefault("notas", []): C["notas"].append(texto); _grava(d, C)
 
-SERVICOS = ("claude", "gemini", "apify", "grok", "kie")   # grok/kie: imagens e vídeos do Ad Animado (lib/gerativa.py)
-CONTA = {"claude": "chamadas", "gemini": "vistos", "apify": "buscas", "grok": "geracoes", "kie": "geracoes"}
+SERVICOS = ("claude", "gemini", "apify", "grok", "kie", "google")   # grok/kie: imagens e vídeos do Ad Animado (lib/gerativa.py)
+CONTA = {"claude": "chamadas", "gemini": "vistos", "apify": "buscas", "grok": "geracoes", "kie": "geracoes", "google": "geracoes"}
 
 def resumo(d):
-    C = ler(d); s = dict(claude=0.0, gemini=0.0, apify=0.0, grok=0.0, kie=0.0, chamadas=0, vistos=0, buscas=0, geracoes=0)
+    C = ler(d); s = dict(claude=0.0, gemini=0.0, apify=0.0, grok=0.0, kie=0.0, google=0.0, chamadas=0, vistos=0, buscas=0, geracoes=0)
     for it in C["itens"]:
         s[it["servico"]] = s.get(it["servico"], 0.0) + it["usd"]
         if it["servico"] in CONTA: s[CONTA[it["servico"]]] += 1

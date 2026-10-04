@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>UGC ultra-realista · Ad Animado</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#0a0a0a;--painel:#161618;--painel2:#1c1c1e;--linha:rgba(255,255,255,.08);--txt:#f5f5f7;--sub:#8e8e93;--sub2:#636366;--azul:#0a84ff;--verde:#30d158;--verm:#ff453a;--amar:#ffd60a;--ctl:rgba(255,255,255,.07);--ctl2:rgba(255,255,255,.12)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:14px -apple-system,BlinkMacSystemFont,"Avenir Next",sans-serif}
+header{display:flex;align-items:center;gap:14px;padding:14px 24px;border-bottom:1px solid var(--linha);background:var(--painel);position:sticky;top:0;z-index:5}
+header h1{font-size:18px;margin:0}header .esp{flex:1}header a.volta{color:var(--sub);text-decoration:none}header a.volta:hover{color:var(--txt)}
+main{padding:22px 24px 80px;max-width:1500px;margin:0 auto}
+button,select,input,textarea{font:inherit;color:var(--txt);background:var(--ctl);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:7px 11px}
+button{cursor:pointer}button.pri{background:var(--azul);border-color:var(--azul)}button.ok{background:#1f6f3a;border-color:#2c8a4c}button.perigo{color:#ff8a82}
+button:hover{border-color:rgba(255,255,255,.25)}button:disabled{opacity:.45;cursor:default}
+textarea{width:100%;resize:vertical;min-height:70px;line-height:1.4}
+.cinza{color:var(--sub)}.peq{font-size:12px}.nw{white-space:nowrap}
+.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+.cardp{background:var(--painel);border:1px solid var(--linha);border-radius:14px;overflow:hidden;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.cardp:hover{border-color:rgba(255,255,255,.2)}
+.cardp .capa{aspect-ratio:9/16;background:#000 center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:var(--sub2)}
+.cardp .inf{padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.selo{display:inline-block;border-radius:20px;padding:1px 9px;font-size:11px;border:1px solid rgba(255,255,255,.14);color:#c7c7cc}
+.selo.rodando{color:#64b5ff;border-color:#1f4a6e}.selo.erro{color:#ff8a82;border-color:#6b2520}.selo.aguardando{color:var(--amar);border-color:#6b5a14}.selo.pronto{color:#6ee795;border-color:#1d5c34}
+.painel{background:var(--painel);border:1px solid var(--linha);border-radius:14px;padding:18px;margin-bottom:18px}
+.painel h3{margin:0 0 12px;font-size:15px}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:18px}.form .todo{grid-column:1/-1}
+.form label{display:block;color:var(--sub);font-size:12px;margin:0 0 6px}
+.drop{border:1.5px dashed rgba(255,255,255,.18);border-radius:12px;padding:18px;text-align:center;color:var(--sub);cursor:pointer}
+.drop.sobre{border-color:var(--azul);color:var(--txt)}
+.refs{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.ref{width:150px;background:var(--painel2);border:1px solid var(--linha);border-radius:10px;overflow:hidden;font-size:12px}
+.ref img{width:100%;aspect-ratio:1;object-fit:cover;display:block}.ref .c{padding:6px;display:flex;flex-direction:column;gap:5px}.ref select,.ref input{font-size:12px;padding:4px 6px;width:100%}
+.modo{display:flex;gap:10px}.modo label{flex:1;border:1px solid var(--linha);border-radius:10px;padding:10px;cursor:pointer;color:var(--txt);font-size:13px}
+.modo label.on{border-color:var(--azul);background:rgba(10,132,255,.08)}.modo span{display:block;color:var(--sub);font-size:12px;margin-top:3px}
+.aviso{color:var(--amar);font-size:12px;margin-top:6px}.erro{color:#ff8a82}
+.etapas{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
+.et{font-size:12px;padding:5px 10px;border-radius:8px;background:var(--ctl);color:var(--sub)}
+.et.ok{color:#6ee795}.et.rodando{color:#64b5ff;background:rgba(10,132,255,.12)}.et.erro{color:#ff8a82;background:rgba(255,69,58,.1)}
+.et small{display:block;color:var(--sub2);font-size:11px;margin-top:2px;max-width:260px}
+.acoes{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.beats{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.beat{background:var(--painel);border:1px solid var(--linha);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.beat.refazer{border-color:#8a6d12}.beat.erro{border-color:#6b2520}.beat.sel{outline:2px solid var(--azul)}
+.beat .midia{position:relative;aspect-ratio:9/16;background:#000;display:flex;align-items:center;justify-content:center;color:var(--sub2)}
+.beat .midia img,.beat .midia video{width:100%;height:100%;object-fit:cover;display:block}
+.beat .num{position:absolute;left:8px;top:8px;background:rgba(0,0,0,.7);border-radius:6px;padding:2px 7px;font-weight:700;font-size:12px}
+.beat .tr{position:absolute;right:8px;top:8px;border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700}
+.tr.AVATAR{background:#3a2a5c;color:#d9c2ff}.tr.BROLL{background:#1f4a3a;color:#9ff0c9}.tr.PRODUTO{background:#5c3a1a;color:#ffd0a1}
+.beat .chk{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.7);border-radius:6px;padding:3px 6px;font-size:12px}
+.beat .gerando{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);font-size:12px}
+.beat .corpo{padding:10px;display:flex;flex-direction:column;gap:7px;font-size:12.5px}
+.beat .fala{font-weight:600;line-height:1.35}.beat .tc{color:var(--sub);font-size:11.5px;font-variant-numeric:tabular-nums}
+.veredito{font-size:12px;border-radius:8px;padding:6px 8px;line-height:1.35}
+.veredito.bom{background:rgba(48,209,88,.1);color:#8fe3b0}.veredito.ruim{background:rgba(255,214,10,.1);color:#ffe27a}.veredito.falha{background:rgba(255,69,58,.1);color:#ff9a93}
+.beat textarea{font-size:12px;min-height:88px}
+.hist{display:flex;gap:4px}.hist img{width:34px;height:60px;object-fit:cover;border-radius:4px;opacity:.7}
+details summary{cursor:pointer;color:var(--sub)}details pre{white-space:pre-wrap;font-size:12px;background:var(--painel2);padding:10px;border-radius:8px;max-height:320px;overflow:auto}
+.locks pre{white-space:pre-wrap;font-size:12px;background:var(--painel2);padding:10px;border-radius:8px;margin:4px 0 10px}
+.timeline{display:flex;height:84px;border-radius:10px;overflow:hidden;background:#000;margin-top:10px}
+.timeline div{position:relative;border-right:1px solid #000;background:#222 center/cover no-repeat;min-width:3px;cursor:pointer}
+.timeline div span{position:absolute;left:3px;bottom:3px;font-size:10px;background:rgba(0,0,0,.7);border-radius:4px;padding:0 4px}
+.final{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}.final video{height:520px;max-width:100%;border-radius:10px;background:#000}
+.prog{height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:6px}.prog s{display:block;height:100%;background:var(--azul);text-decoration:none}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:40px 16px}
+.modal.on{display:flex}.modal .caixa{background:var(--painel);border:1px solid var(--linha);border-radius:14px;padding:20px;width:100%;max-width:720px}
+.cfgcard{background:var(--painel2);border:1px solid var(--linha);border-radius:12px;padding:14px;margin-bottom:12px}.cfgcard h4{margin:0 0 8px;font-size:14px}
+.cfgcard label{display:block;color:var(--sub);font-size:12px;margin:10px 0 5px}.cfgcard input,.cfgcard select{width:100%}
+.st{font-size:12px;color:var(--sub)}.st.ok{color:#6ee795}.st.no{color:#ff8a82}
+table.tab{width:100%;border-collapse:collapse;font-size:13px}table.tab td,table.tab th{padding:7px 8px;border-bottom:1px solid var(--linha);text-align:left}table.tab .n{text-align:right;font-variant-numeric:tabular-nums}
+@media(max-width:800px){.form{grid-template-columns:1fr}main{padding:16px}}
+.aviso{color:var(--amar);font-size:12.5px;margin:4px 0}
+.beat .midia video{cursor:pointer}
+.hist img{cursor:zoom-in}
+.modal{display:none}
+</style>
+</head>
+<body>
+<header><a class="volta" href="/" style="color:var(--sub)">Ad Animado</a><h1>UGC ultra-realista</h1><span class="esp"></span>
+  <button onclick="location.href='/#cfg'">⚙ Configurações</button><button class="pri" id="btNovo" onclick="abrirNovo()">+ Novo UGC</button></header>
+<main id="app"></main>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const arq=p=>p?"/f?p="+encodeURIComponent(p):"";
+const usd=v=>"US$ "+(v||0).toFixed(2).replace(".",",");
+async function post(url,corpo){const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(corpo||{})});const j=await r.json().catch(()=>({}));if(!r.ok||j.erro)throw new Error(j.erro||"falhou");return j}
+function sobe(url,file,prog){return new Promise((ok,falha)=>{const x=new XMLHttpRequest();x.open("POST",url);x.upload.onprogress=e=>prog&&prog(e.total?e.loaded/e.total:0);
+  x.onload=()=>{let j={};try{j=JSON.parse(x.responseText)}catch(e){}if(x.status<300&&j.ok)ok(j);else falha(new Error(j.erro||`falhou (${x.status})`))};x.onerror=()=>falha(new Error("sem conexão"));x.send(file)})}
+const P=new URLSearchParams(location.search),ID=P.get("id");
+let E=null,timer=null,SEL=new Set(),EDIT={};
+const rotStatus=s=>({rodando:"rodando",aguardando:"aguardando você",pronto:"pronto",erro:"erro",novo:"novo"}[s]||s||"");
+function alerta(m){const p=document.createElement("div");p.className="painel erro";p.textContent=m;$("#app").prepend(p);window.scrollTo(0,0);setTimeout(()=>p.remove(),8000)}
+function abreVideo(src){const f=document.createElement("div");f.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99;display:flex;align-items:center;justify-content:center";
+  f.innerHTML=`<video src="${src}" controls autoplay playsinline style="max-width:92vw;max-height:88vh;border-radius:10px"></video>`;f.onclick=e=>{if(e.target==f){f.querySelector("video").pause();f.remove()}};document.body.appendChild(f)}
+function abreImg(src){const f=document.createElement("div");f.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99;display:flex;align-items:center;justify-content:center;cursor:zoom-out";
+  f.innerHTML=`<img src="${src}" style="max-width:92vw;max-height:90vh;border-radius:10px">`;f.onclick=()=>f.remove();document.body.appendChild(f)}
+
+// ---------------- lista
+async function lista(){
+  const L=await (await fetch("/api/ugc/lista")).json();
+  $("#app").innerHTML=`<div class="painel"><h3>Como funciona</h3><div class="cinza" style="line-height:1.6">
+    1. Cole o roteiro (a fala fica travada, palavra por palavra) e envie as imagens iniciais das cenas (um frame real, de preferência do Pinterest) — quantas o vídeo pedir.
+    2. Se quiser, envie a foto da sua avatar: o Claude escreve a troca de rosto (skill troca-rosto) e a IA de imagem coloca a avatar em cada cena, inclusive segurando o produto.
+    3. O Claude lê cada imagem e o vídeo de referência, divide a fala em clipes de 4 a 10 s pela velocidade da fala e escreve os prompts do Omni com todas as travas (skill omni-ugc-director).
+    4. Os vídeos saem no Gemini Omni Flash (KIE ou Google), todos ao mesmo tempo. Você assiste e aprova um por um, troca a cena de um clipe quando quiser, refaz o que não ficou bom.
+    5. Baixa a pasta com os clipes numerados ou tudo junto num vídeo só.</div></div>
+    ${L.length?`<div class="grade">${L.map(a=>`<a class="cardp" href="/ugc?id=${encodeURIComponent(a.id)}">
+      <div class="capa" style="${a.capa?`background-image:url('${arq(a.capa)}')`:""}">${a.capa?"":"sem imagem"}</div>
+      <div class="inf"><b>${esc(a.nome)}</b><span class="cinza peq">${a.clipes?`${a.clipes} clipes · ${a.prontos} prontos · ${a.aprovados} aprovados · `:""}${esc((a.criado||"").slice(0,10))}</span>
+      <span><span class="selo ${esc(a.status)}">${esc(rotStatus(a.status))}</span> <span class="cinza peq">${usd(a.custo.total)}</span></span></div></a>`).join("")}</div>`
+    :`<div class="cinza" style="padding:30px 0">Nenhum UGC ainda. Clique em <b>+ Novo UGC</b>.</div>`}`;
+}
+
+// ---------------- novo
+let N=null,CFG=null;
+async function abrirNovo(){
+  if(ID){location.href="/ugc?novo=1";return}
+  CFG=await (await fetch("/api/config")).json();
+  N={id:Math.random().toString(36).slice(2,12)+Date.now().toString(36),cenas:[],avatar:null,produto:null,ref:null};
+  const mi=(CFG.modelos_imagem||[]).filter(m=>m.id.startsWith("kie:")||m.id=="grok"),mv=(CFG.modelos_video||[]).filter(m=>m.id!="kie:google/gemini-omni-flash-1-1");
+  $("#app").innerHTML=`<div class="painel"><h3>Novo UGC ultra-realista</h3><div class="form">
+    <div><label>Nome</label><input id="nNome" style="width:100%" placeholder="ex.: Flora Max — Lead 2"></div>
+    <div><label>Personagem (nome usado no identity lock) e voz (opcional — o Claude escolhe se vazio)</label>
+      <div class="acoes"><input id="nPer" value="ANA" style="width:110px"><input id="nVoz" style="flex:1" placeholder="ex.: voz calma de mulher madura, tom de amiga"></div></div>
+    <div class="todo"><label>Roteiro (a fala do avatar — fica travada, nunca é reescrita; números por extenso)</label><textarea id="nRot" style="min-height:140px"></textarea></div>
+    <div><label>Velocidade da fala (decide quantas palavras cabem em cada clipe)</label>
+      <select id="nTaxa" style="width:100%"><option value="calmo">Calma — 2,35 palavras/s (até 23 palavras em 10 s)</option><option value="rapido">Rápida/nervosa — 2,9 palavras/s (até 29 em 10 s)</option></select></div>
+    <div><label>Onde gerar no Omni (Gemini Omni Flash 1.1)</label>
+      <div class="acoes"><select id="nOmni" style="flex:1"><option value="kie">KIE (créditos da KIE)</option><option value="google">Google AI Studio (chave do Gemini, ~US$ 0,10/s)</option></select>
+      <select id="nRes"><option>720p</option><option>1080p</option><option>360p</option><option>4k</option></select></div></div>
+    <div class="todo"><label>Imagens iniciais das cenas (uma ou mais — o Claude escolhe a cena de cada clipe e você pode trocar depois)</label>
+      <div class="drop" id="dCenas">Arraste as imagens aqui ou clique para escolher</div><input type="file" id="fCenas" accept="image/*" multiple hidden>
+      <div class="refs" id="nCenas"></div></div>
+    <div><label>Foto da avatar (para montar ela dentro das cenas marcadas)</label>
+      <div class="drop" id="dAv">Arraste a foto da avatar aqui ou clique</div><input type="file" id="fAv" accept="image/*" hidden><div id="nAv" class="refs"></div>
+      <label style="margin-top:8px">Sem foto? Descreva o rosto novo (opcional)</label><input id="nRosto" style="width:100%" placeholder="ex.: mulher brasileira de 50 anos, cabelo castanho curto"></div>
+    <div><label>Produto (PNG com o rótulo nítido) e marca</label>
+      <div class="drop" id="dProd">Arraste o PNG do produto aqui ou clique</div><input type="file" id="fProd" accept="image/*" hidden><div id="nProd" class="refs"></div>
+      <input id="nMarca" style="width:100%;margin-top:8px" placeholder="marca escrita no rótulo (ex.: FLORA MAX)"></div>
+    <div><label>Vídeo de referência (o anúncio que funcionou — o Claude copia o mecanismo, não os visuais)</label>
+      <div class="drop" id="dRef">Arraste o vídeo aqui ou clique</div><input type="file" id="fRef" accept="video/*" hidden><div id="nRef" class="cinza peq"></div></div>
+    <div><label>Avatar nas cenas: pedido geral (vale para todas as cenas marcadas)</label><input id="nPedAv" style="width:100%" placeholder="ex.: segurando o produto na mão direita, rótulo para a câmera">
+      <label style="margin-top:8px">IA da troca de rosto</label><select id="nMI" style="width:100%">${mi.map(m=>`<option value="${m.id}" ${m.id=="kie:nano-banana-pro"?"selected":""}>${esc(m.nome)}</option>`).join("")}</select></div>
+    <div><label>B-roll (produto, mãos, lifestyle — cobre partes da fala)</label>
+      <label style="display:flex;gap:8px;align-items:center;color:var(--txt)"><input type="checkbox" id="nBroll" style="width:auto"> Gerar B-roll também</label>
+      <select id="nMB" style="width:100%;margin-top:6px">${mv.filter(m=>m.id.startsWith("kie:")).map(m=>`<option value="${m.id}" ${m.id=="kie:kling/v3-turbo-image-to-video"?"selected":""}>${esc(m.nome)}</option>`).join("")}</select></div>
+    <div class="todo"><label>Observações para o Claude (opcional)</label><textarea id="nObs" style="min-height:60px" placeholder="ex.: hook com cara de indignação; CTA calmo"></textarea></div>
+    <div class="todo acoes"><button class="pri" id="nIr" onclick="nCriar()">Criar e preparar (avatar + prompts)</button><button onclick="location.href='/ugc'">Cancelar</button><span id="nSt" class="cinza"></span></div>
+  </div></div>`;
+  liga("dCenas","fCenas",fs=>{for(const f of fs)N.cenas.push({file:f,url:URL.createObjectURL(f),trocar:false,modo:"rosto + cabelo",pedido:"",nota:""});nDesCenas()});
+  liga("dAv","fAv",fs=>{N.avatar=fs[0];$("#nAv").innerHTML=`<div class="ref"><img src="${URL.createObjectURL(fs[0])}"></div>`;N.cenas.forEach(c=>c.trocar=true);nDesCenas()});
+  liga("dProd","fProd",fs=>{N.produto=fs[0];$("#nProd").innerHTML=`<div class="ref"><img src="${URL.createObjectURL(fs[0])}" style="object-fit:contain;background:#fff"></div>`});
+  liga("dRef","fRef",fs=>{N.ref=fs[0];$("#nRef").textContent=fs[0].name});
+}
+function liga(d,f,cb){const D=$("#"+d),F=$("#"+f);D.onclick=()=>F.click();F.onchange=()=>{cb([...F.files]);F.value=""};
+  D.ondragover=e=>{e.preventDefault();D.classList.add("sobre")};D.ondragleave=()=>D.classList.remove("sobre");D.ondrop=e=>{e.preventDefault();D.classList.remove("sobre");cb([...e.dataTransfer.files])}}
+function nDesCenas(){
+  $("#nCenas").innerHTML=N.cenas.map((c,k)=>`<div class="ref" style="width:190px"><img src="${c.url}" style="aspect-ratio:9/16"><div class="c">
+    <b>Cena c${k+1}</b>
+    <label style="display:flex;gap:6px;align-items:center;color:var(--txt);margin:0"><input type="checkbox" style="width:auto" ${c.trocar?"checked":""} onchange="N.cenas[${k}].trocar=this.checked;nDesCenas()"> montar a avatar aqui</label>
+    ${c.trocar?`<select onchange="N.cenas[${k}].modo=this.value">${["rosto + cabelo","só rosto","pessoa inteira"].map(m=>`<option ${m==c.modo?"selected":""}>${m}</option>`).join("")}</select>
+    <input placeholder="pedido extra (ex.: segurando o produto)" value="${esc(c.pedido)}" oninput="N.cenas[${k}].pedido=this.value">`:""}
+    <input placeholder="nota (ex.: usar no hook)" value="${esc(c.nota)}" oninput="N.cenas[${k}].nota=this.value">
+    <button class="perigo" onclick="N.cenas.splice(${k},1);nDesCenas()">remover</button></div></div>`).join("");
+}
+async function nCriar(){
+  const st=$("#nSt");st.className="cinza";$("#nIr").disabled=true;
+  try{
+    const nome=$("#nNome").value.trim();if(!nome)throw new Error("dê um nome ao UGC");
+    if(!$("#nRot").value.trim())throw new Error("cole o roteiro");
+    if(!N.cenas.length)throw new Error("envie pelo menos uma imagem inicial");
+    const base=`/api/ugc/arquivo?id=${N.id}`;
+    for(let k=0;k<N.cenas.length;k++){st.textContent=`enviando a cena ${k+1} de ${N.cenas.length}…`;await sobe(`${base}&tipo=cena&n=${k+1}&nome=${encodeURIComponent(N.cenas[k].file.name)}`,N.cenas[k].file)}
+    if(N.avatar){st.textContent="enviando a avatar…";await sobe(`${base}&tipo=avatar&nome=${encodeURIComponent(N.avatar.name)}`,N.avatar)}
+    if(N.produto){st.textContent="enviando o produto…";await sobe(`${base}&tipo=produto&nome=${encodeURIComponent(N.produto.name)}`,N.produto)}
+    if(N.ref)await sobe(`${base}&tipo=refvideo&nome=${encodeURIComponent(N.ref.name)}`,N.ref,p=>st.textContent=`enviando o vídeo de referência… ${Math.round(p*100)}%`);
+    st.textContent="criando…";
+    const r=await post("/api/ugc/criar",{id:N.id,nome,roteiro:$("#nRot").value,personagem:{nome:$("#nPer").value,voz:$("#nVoz").value},taxa:$("#nTaxa").value,omni:$("#nOmni").value,
+      resolucao:$("#nRes").value,broll:$("#nBroll").checked,modelo_broll:$("#nMB").value,modelo_img:$("#nMI").value,rosto_novo:$("#nRosto").value,pedido_avatar:$("#nPedAv").value,
+      marca:$("#nMarca").value,obs:$("#nObs").value,cenas:N.cenas.map((c,k)=>({n:k+1,trocar:c.trocar,modo:c.modo,pedido:c.pedido,nota:c.nota}))});
+    location.href="/ugc?id="+encodeURIComponent(r.id);
+  }catch(e){st.className="erro";st.textContent=e.message;$("#nIr").disabled=false}
+}
+
+// ---------------- projeto
+async function carrega(){
+  try{E=await (await fetch("/api/ugc/estado?id="+encodeURIComponent(ID))).json()}catch(e){$("#app").innerHTML=`<div class="erro">não consegui abrir este UGC</div>`;return}
+  if(E.erro){$("#app").innerHTML=`<div class="erro">${esc(E.erro)}</div>`;return}
+  desenha();clearTimeout(timer);timer=setTimeout(carrega,E.estado.rodando?3000:15000);
+}
+let ULT="";
+function focoEmTexto(){const a=document.activeElement;return a&&(a.tagName=="TEXTAREA"||(a.tagName=="INPUT"&&a.type!="checkbox")||a.tagName=="SELECT")}
+function tocando(){return [...document.querySelectorAll("#app video")].some(v=>!v.paused&&!v.ended)}
+function chaveDet(x){const b=x.closest("[id]");return (b?b.id:"")+"|"+((x.querySelector("summary")||{}).textContent||"")}
+function desenha(forcar){
+  if(focoEmTexto())return;
+  let sig;try{sig=JSON.stringify(Object.assign({},E,{estado:Object.assign({},E.estado,{log:null})}))+"|"+[...SEL].join(",")}catch(e){sig=Math.random()+""}
+  if(!forcar&&sig==ULT){const lg=document.querySelector("#app details.registro pre");if(lg)lg.textContent=(E.estado.log||[]).join("\n");return}
+  if(!forcar&&tocando())return;
+  ULT=sig;const app=$("#app"),y=window.scrollY,abertos=new Set([...app.querySelectorAll("details")].filter(x=>x.open).map(chaveDet));
+  app.style.minHeight=app.offsetHeight+"px";desenhaAgora();
+  app.querySelectorAll("details").forEach(x=>{if(abertos.has(chaveDet(x)))x.open=true});window.scrollTo(0,y);
+  clearTimeout(desenha._t);desenha._t=setTimeout(()=>{app.style.minHeight=""},4000);
+}
+function desenhaAgora(){
+  const st=E.estado,Pd=E.pedido,Pl=E.plano||{},rod=st.rodando,clipes=Pl.clipes||[],broll=Pl.broll||[];
+  const etapas=(st.etapas||[]).map(e=>`<div class="et ${e.estado}">${e.estado=="ok"?"✓ ":e.estado=="rodando"?"… ":e.estado=="erro"?"✕ ":""}${esc(e.nome)}${e.detalhe?`<small>${esc(e.detalhe)}</small>`:""}</div>`).join("");
+  const prontos=clipes.filter(c=>c.video_estado=="ok").length,aprov=clipes.filter(c=>c.aprovado).length,pend=[...clipes,...broll].filter(c=>c.video_estado!="ok").length;
+  let botoes="";
+  if(rod)botoes=`<button class="perigo" onclick="acao('cancelar')">Cancelar</button>`;
+  else{
+    if(st.status=="erro")botoes+=`<button class="pri" onclick="acao('retomar')">Retomar de onde parou</button>`;
+    if(clipes.length){
+      if(SEL.size)botoes+=`<button class="pri" onclick="acao('videos',{itens:[...SEL]});SEL.clear()">Gerar/refazer os ${SEL.size} selecionados</button>`;
+      if(pend)botoes+=`<button class="${SEL.size?"":"pri"}" onclick="acao('videos')">Gerar ${prontos?"os que faltam":"todos os vídeos"} (${pend})</button>`;
+      if(prontos)botoes+=`<button onclick="acao('montar')">Montar todos juntos${aprov?` (${aprov} aprovados)`:""}</button>`;
+      botoes+=`<button onclick="if(confirm('Refazer o plano? Os prompts editados à mão e os vídeos atuais deixam de valer para os clipes que mudarem.'))acao('plano')">Refazer o plano (prompts)</button>`;
+    }
+    botoes+=`<button class="perigo" onclick="apagar()">Apagar</button>`;
+  }
+  const baixar=prontos?`<div class="painel"><h3>Baixar</h3><div class="acoes">
+      <a href="/api/ugc/zip?id=${encodeURIComponent(ID)}"><button class="pri">Baixar a pasta com todos os clipes numerados (.zip)</button></a>
+      ${aprov?`<a href="/api/ugc/zip?id=${encodeURIComponent(ID)}&aprovados=1"><button>Só os aprovados (.zip)</button></a>`:""}
+      ${E.juntos?`<a href="${arq(E.juntos)}" download><button class="ok">Baixar todos juntos (.mp4)</button></a>`:`<span class="cinza peq">Para o vídeo único, clique em "Montar todos juntos".</span>`}</div>
+      ${E.juntos?`<div class="final" style="margin-top:12px"><video src="${arq(E.juntos)}#t=0.1" preload="metadata" controls playsinline></video><div class="cinza peq">${Pl.juntos?`${Pl.juntos.clipes.length} clipes · ${String(Pl.juntos.dur).replace(".",",")} s · montado ${esc(Pl.juntos.quando)}`:""}${aprov&&aprov<prontos?"<br>usa só os aprovados":""}</div></div>`:""}</div>`:"";
+  $("#app").innerHTML=`
+  <div class="painel"><div class="acoes" style="justify-content:space-between"><h3 style="margin:0">${esc(Pd.nome)} <span class="selo ${esc(st.status)}">${esc(rotStatus(st.status))}</span></h3>
+    <span class="cinza peq">${clipes.length} clipes · ${prontos} prontos · ${aprov} aprovados · gasto ${usd(E.custo.total)}</span></div>
+    <div class="acoes peq" style="margin-top:10px">Omni pela <select ${rod?"disabled":""} onchange="cfg({omni:this.value})">${E.omni_provedores.map(o=>`<option value="${o.id}" ${o.id==Pd.omni?"selected":""}>${esc(o.nome)}</option>`).join("")}</select>
+      resolução <select ${rod?"disabled":""} onchange="cfg({resolucao:this.value})">${["360p","720p","1080p","4k"].map(r=>`<option ${r==Pd.resolucao?"selected":""}>${r}</option>`).join("")}</select>
+      <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" style="width:auto" ${Pd.broll?"checked":""} ${rod?"disabled":""} onchange="cfg({broll:this.checked})"> B-roll</label>
+      ${Pd.broll?`B-roll em <select ${rod?"disabled":""} onchange="cfg({modelo_broll:this.value})">${E.modelos_video.filter(m=>m.id.startsWith("kie:")).map(m=>`<option value="${m.id}" ${m.id==Pd.modelo_broll?"selected":""}>${esc(m.nome)}</option>`).join("")}</select>`:""}
+      <span class="cinza">${Pd.broll&&!broll.length&&clipes.length?"ligou o B-roll depois do plano: clique em Refazer o plano":""}</span></div>
+    <div class="etapas">${etapas}</div>${st.mensagem?`<div class="${st.status=="erro"?"erro":"cinza"}" style="margin-bottom:10px">${esc(st.mensagem)}</div>`:""}
+    <div class="acoes">${botoes}</div></div>
+  ${baixar}
+  ${secaoCenas()}
+  ${Pl.analise||(Pl.avisos||[]).length||Pl.voz?`<div class="painel"><h3>Direção</h3>
+    ${Pl.analise?`<p style="white-space:pre-wrap">${esc(Pl.analise)}</p>`:""}${Pl.voz?`<p class="cinza peq"><b>Voz (igual em todos os clipes):</b> ${esc(Pl.voz)}</p>`:""}
+    ${(Pl.avisos||[]).map(a=>`<div class="aviso">⚠ ${esc(a)}</div>`).join("")}${Pl.auditoria?`<p class="cinza peq">Auditoria de integridade: roteiro = soma das falas (${esc(Pl.auditoria)}).</p>`:""}</div>`:""}
+  ${clipes.length?`<div class="painel"><h3>Clipes (A-roll no Omni)</h3><div class="cinza peq" style="margin-bottom:10px">Clique na imagem/vídeo para selecionar · dois cliques para assistir grande com som · aprove um por um</div><div class="beats">${clipes.map(cardClipe).join("")}</div></div>`:""}
+  ${broll.length?`<div class="painel"><h3>B-roll</h3><div class="beats">${broll.map(cardBroll).join("")}</div></div>`:""}
+  <div class="painel"><details class="registro"><summary>Registro</summary><pre>${esc((st.log||[]).join("\n"))}</pre></details></div>`;
+}
+function secaoCenas(){
+  const Pd=E.pedido,rod=E.estado.rodando;
+  const fontes=`<div class="acoes peq" style="margin-bottom:10px">
+    ${Pd.avatar_abs?`<span>Avatar <img src="${arq(Pd.avatar_abs)}" style="height:54px;border-radius:6px;vertical-align:middle;cursor:zoom-in" onclick="abreImg(this.src)"></span>`:`<span class="cinza">sem foto de avatar${Pd.rosto_novo?` · rosto novo: ${esc(Pd.rosto_novo)}`:""}</span>`}
+    ${rod?"":`<button onclick="trocaFonte('avatar')">${Pd.avatar_abs?"trocar":"enviar"} avatar</button>`}
+    ${Pd.produto_abs?`<span>Produto <img src="${arq(Pd.produto_abs)}" style="height:54px;border-radius:6px;background:#fff;vertical-align:middle"></span>`:""}
+    ${rod?"":`<button onclick="trocaFonte('produto')">${Pd.produto_abs?"trocar":"enviar"} produto</button>`}
+    ${Pd.referencia_abs?`<span>Referência <a href="#" onclick="abreVideo('${arq(Pd.referencia_abs)}');return false">assistir</a></span>`:""}</div>`;
+  return `<div class="painel"><h3>Cenas (imagens iniciais)</h3>${fontes}<div class="beats">${E.cenas.map(c=>{
+    const usos=(E.plano.clipes||[]).filter(x=>x.cena==c.id).map(x=>String(x.n).padStart(2,"0"));
+    const gerando=c.swap_estado=="gerando";
+    return `<div class="beat ${c.swap_estado=="erro"?"erro":""}" id="cena-${c.id}"><div class="midia" style="cursor:zoom-in" onclick="abreImg('${arq(c.usada_abs)}')"><img src="${arq(c.usada_abs)}"><span class="num">${c.id}</span>
+      ${c.trocar?`<span class="tr AVATAR">avatar</span>`:""}${gerando?`<div class="gerando">montando a avatar…</div>`:""}</div>
+      <div class="corpo">${c.trocar&&c.final_abs?`<div class="hist" title="original e versões anteriores"><img src="${arq(c.original_abs)}" title="original" onclick="abreImg(this.src)">${(c.swap_hist_abs||[]).map(h=>`<img src="${arq(h)}" onclick="abreImg(this.src)">`).join("")}</div>`:""}
+        <div class="cinza peq">${usos.length?`usada nos clipes ${usos.join(", ")}`:"ainda sem clipe"}${c.lida?"":" · ainda não lida"}${c.nota?` · ${esc(c.nota)}`:""}</div>
+        ${c.swap_erro?`<div class="veredito falha">${esc(c.swap_erro)}</div>`:""}
+        ${(c.avisos||[]).map(a=>`<div class="veredito ruim">${esc(a)}</div>`).join("")}
+        ${rod?"":`<label style="display:flex;gap:6px;align-items:center;color:var(--txt)"><input type="checkbox" style="width:auto" ${c.trocar?"checked":""} onchange="cenaCfg('${c.id}',{trocar:this.checked})"> montar a avatar aqui</label>`}
+        ${c.trocar?`<details><summary>pedido e prompt da troca de rosto</summary>
+          <label class="peq cinza">pedido extra (ex.: segurando o produto)</label><input style="width:100%" value="${esc(c.pedido||"")}" ${rod?"disabled":""} oninput="EDIT['p${c.id}']=this.value">
+          <label class="peq cinza">o que trocar</label><select ${rod?"disabled":""} oninput="EDIT['m${c.id}']=this.value">${["rosto + cabelo","só rosto","pessoa inteira"].map(m=>`<option ${m==c.modo?"selected":""}>${m}</option>`).join("")}</select>
+          <textarea ${rod?"disabled":""} oninput="EDIT['s${c.id}']=this.value" placeholder="o Claude escreve o prompt">${esc(EDIT['s'+c.id]??c.swap_prompt??"")}</textarea>
+          ${rod?"":`<div class="acoes" style="margin-top:6px"><button onclick="refazTroca('${c.id}',false)">Refazer com o pedido (Claude reescreve)</button><button onclick="refazTroca('${c.id}',true)">Refazer com este prompt</button></div>`}</details>`:""}
+        ${rod?"":`<div class="acoes"><button onclick="trocaImagemCena('${c.id}')">Trocar a imagem</button></div>`}
+      </div></div>`}).join("")}
+    ${rod?"":`<div class="beat" style="justify-content:center;align-items:center;min-height:200px;cursor:pointer" onclick="novaCena()"><div class="cinza" style="padding:20px;text-align:center">+ adicionar cena<br><span class="peq">(outra imagem inicial)</span></div></div>`}</div></div>`;
+}
+function cardClipe(c){
+  const rod=E.estado.rodando,n2=String(c.n).padStart(2,"0"),cena=E.cenas.find(x=>x.id==c.cena)||{};
+  const midia=c.video_abs?`<video src="${arq(c.video_abs)}" preload="none" playsinline poster="${arq(cena.usada_abs)}" onmouseenter="this.play().catch(()=>{})" onmouseleave="this.pause()" ondblclick="event.stopPropagation();abreVideo(this.src)"></video>`
+    :`<img src="${arq(cena.usada_abs)}">`;
+  let ver="";
+  if(c.video_estado=="erro")ver=`<div class="veredito falha">✕ ${esc(c.video_erro||"falhou")}</div>`;
+  else if(c.video_estado=="ok")ver=c.aprovado?`<div class="veredito bom">✓ aprovado</div>`:`<div class="veredito ruim">assista e aprove</div>`;
+  const val=EDIT["c"+c.n]??c.prompt??"";
+  return `<div class="beat ${c.video_estado=="erro"?"erro":""} ${SEL.has(String(c.n))?"sel":""}" id="clipe-${c.n}">
+    <div class="midia" onclick="sel('${c.n}')">${midia}<span class="num">${n2}</span><span class="tr BROLL">${c.dur} s</span>
+      ${SEL.has(String(c.n))?`<span class="chk">✓ selecionado</span>`:""}${c.video_estado=="gerando"?`<div class="gerando">gerando no Omni…</div>`:""}</div>
+    <div class="corpo"><div class="fala">"${esc(c.fala)}"</div><div class="cinza peq">${c.palavras} palavras</div>${ver}
+      <div class="acoes peq">cena <select ${rod?"disabled":""} onchange="editar('${c.n}',{cena:this.value})">${E.cenas.map(x=>`<option value="${x.id}" ${x.id==c.cena?"selected":""}>${x.id}${x.nota?" · "+esc(x.nota.slice(0,18)):""}</option>`).join("")}</select>
+        duração <select ${rod?"disabled":""} onchange="editar('${c.n}',{dur:+this.value})">${[4,6,8,10].map(d=>`<option ${d==c.dur?"selected":""}>${d}</option>`).join("")}</select></div>
+      ${!rod&&c.video_estado=="ok"?`<div class="acoes">${c.aprovado?`<button onclick="aprovar('${c.n}',false)">Desaprovar</button>`:`<button class="ok" onclick="aprovar('${c.n}',true)">✓ Aprovar</button>`}<button onclick="abreVideo('${arq(c.video_abs)}')">Assistir</button></div>`:""}
+      <details ${EDIT["c"+c.n]!==undefined?"open":""}><summary>prompt do Omni${c.prompt_editado?" (editado à mão)":""}</summary>
+        <textarea ${rod?"disabled":""} style="min-height:220px" oninput="EDIT['c${c.n}']=this.value">${esc(val)}</textarea>
+        ${rod?"":`<div class="acoes" style="margin-top:6px"><button onclick="refazVideo('${c.n}')">${c.video?"Refazer este vídeo":"Gerar este vídeo"}</button><button onclick="salvaPrompt('${c.n}')">Só salvar</button>${c.prompt_editado?`<button onclick="editar('${c.n}',{refazer_prompt:true})">Voltar ao prompt automático</button>`:""}</div>`}</details>
+      ${(c.historico_abs||[]).length?`<div class="hist" title="versões anteriores">${c.historico_abs.map(h=>`<video src="${arq(h)}" preload="none" style="width:34px;height:60px;object-fit:cover;border-radius:4px" ondblclick="abreVideo(this.src)"></video>`).join("")}</div>`:""}
+    </div></div>`;
+}
+function cardBroll(b){
+  const rod=E.estado.rodando;
+  const midia=b.video_abs?`<video src="${arq(b.video_abs)}" preload="none" muted loop playsinline onmouseenter="this.play().catch(()=>{})" onmouseleave="this.pause()" ondblclick="event.stopPropagation();abreVideo(this.src)"></video>`
+    :b.img_abs?`<img src="${arq(b.img_abs)}">`:`<span class="peq" style="padding:12px;text-align:center">a imagem sai na hora de gerar</span>`;
+  return `<div class="beat ${b.video_estado=="erro"?"erro":""} ${SEL.has(b.id)?"sel":""}" id="broll-${b.id}"><div class="midia" onclick="sel('${b.id}')">${midia}<span class="num">${b.id}</span><span class="tr PRODUTO">${b.dur} s</span>
+      ${SEL.has(b.id)?`<span class="chk">✓ selecionado</span>`:""}${b.video_estado=="gerando"?`<div class="gerando">gerando…</div>`:""}</div>
+    <div class="corpo"><div class="cinza peq">cobre o clipe ${String(b.cobre).padStart(2,"0")}</div>
+      ${b.video_estado=="erro"?`<div class="veredito falha">✕ ${esc(b.video_erro||"")}</div>`:b.video_estado=="ok"?(b.aprovado?`<div class="veredito bom">✓ aprovado</div>`:`<div class="veredito ruim">assista e aprove</div>`):""}
+      ${!rod&&b.video_estado=="ok"?`<div class="acoes">${b.aprovado?`<button onclick="aprovar('${b.id}',false)">Desaprovar</button>`:`<button class="ok" onclick="aprovar('${b.id}',true)">✓ Aprovar</button>`}</div>`:""}
+      <details><summary>prompts (imagem e Kling)</summary><label class="peq cinza">imagem inicial</label><textarea ${rod?"disabled":""} oninput="EDIT['i${b.id}']=this.value">${esc(EDIT['i'+b.id]??b.imagem_prompt)}</textarea>
+        <label class="peq cinza">vídeo</label><textarea ${rod?"disabled":""} oninput="EDIT['v${b.id}']=this.value">${esc(EDIT['v'+b.id]??b.prompt)}</textarea>
+        ${rod?"":`<div class="acoes" style="margin-top:6px"><button onclick="refazBroll('${b.id}')">${b.video?"Refazer":"Gerar"}</button></div>`}</details></div></div>`;
+}
+function sel(k){k=String(k);SEL.has(k)?SEL.delete(k):SEL.add(k);desenha(true)}
+async function acao(a,extra){try{await post("/api/ugc/acao?id="+encodeURIComponent(ID),Object.assign({acao:a},extra||{}));await carrega()}catch(e){alerta(e.message)}}
+const cfg=o=>acao("config",o);
+async function editar(k,o){await acao("editar",Object.assign({item:k},o))}
+async function salvaPrompt(n){const t=EDIT["c"+n];if(t===undefined)return;await editar(n,{prompt:t});delete EDIT["c"+n]}
+async function refazVideo(n){const t=EDIT["c"+n];try{if(t!==undefined){await post("/api/ugc/acao?id="+encodeURIComponent(ID),{acao:"editar",item:n,prompt:t});delete EDIT["c"+n]}await acao("videos",{itens:[String(n)]})}catch(e){alerta(e.message)}}
+async function refazBroll(id){try{const i=EDIT["i"+id],v=EDIT["v"+id];if(i!==undefined||v!==undefined){await post("/api/ugc/acao?id="+encodeURIComponent(ID),{acao:"editar",item:id,imagem_prompt:i,prompt:v});delete EDIT["i"+id];delete EDIT["v"+id]}await acao("videos",{itens:[id]})}catch(e){alerta(e.message)}}
+const aprovar=(k,v)=>acao("aprovar",{item:k,valor:v});
+async function cenaCfg(cid,o){await acao("cena",Object.assign({cena:cid},o))}
+async function refazTroca(cid,usarPrompt){const o={cena:cid,trocar:true};if(EDIT["p"+cid]!==undefined)o.pedido=EDIT["p"+cid];if(EDIT["m"+cid]!==undefined)o.modo=EDIT["m"+cid];
+  if(usarPrompt&&EDIT["s"+cid])o.swap_prompt=EDIT["s"+cid];["p","m","s"].forEach(x=>delete EDIT[x+cid]);await acao("cena",o)}
+function escolhe(accept){return new Promise(ok=>{const f=document.createElement("input");f.type="file";f.accept=accept;f.onchange=()=>ok(f.files[0]);f.click()})}
+async function trocaImagemCena(cid){const f=await escolhe("image/*");if(!f)return;try{const r=await sobe(`/api/ugc/arquivo?proj=${encodeURIComponent(ID)}&tipo=cena&n=${cid.slice(1)}&nome=${encodeURIComponent(f.name)}`,f);await acao("cena",{cena:cid,arquivo:r.arquivo})}catch(e){alerta(e.message)}}
+async function novaCena(){const f=await escolhe("image/*");if(!f)return;const trocar=!!(E.pedido.avatar_abs||E.pedido.rosto_novo)&&confirm("Montar a avatar nesta cena (troca de rosto)?");
+  const pedido=trocar?(prompt("Pedido extra para esta cena (ex.: segurando o produto) — pode deixar vazio","")||""):"";
+  try{const r=await sobe(`/api/ugc/arquivo?proj=${encodeURIComponent(ID)}&tipo=cena&n=${E.cenas.length+1}&nome=${encodeURIComponent(f.name)}`,f);await acao("nova_cena",{arquivo:r.arquivo,trocar,pedido})}catch(e){alerta(e.message)}}
+async function trocaFonte(tipo){const f=await escolhe("image/*");if(!f)return;try{const r=await sobe(`/api/ugc/arquivo?proj=${encodeURIComponent(ID)}&tipo=${tipo}&nome=${encodeURIComponent(f.name)}`,f);await acao("fonte",{[tipo]:r.arquivo});
+  if(tipo=="avatar")alerta("Avatar trocada. Para aplicar, clique em \"Refazer com o pedido\" nas cenas com avatar.")}catch(e){alerta(e.message)}}
+async function apagar(){if(confirm("Apagar este UGC (imagens e vídeos)?")){try{await post("/api/ugc/acao?id="+encodeURIComponent(ID),{acao:"apagar"});location.href="/ugc"}catch(e){alerta(e.message)}}}
+
+if(ID)carrega();else if(P.get("novo"))abrirNovo();else lista();
+</script>
+</body>
+</html>

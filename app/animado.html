@@ -73,7 +73,7 @@ table.tab{width:100%;border-collapse:collapse;font-size:13px}table.tab td,table.
 </style>
 </head>
 <body>
-<header><a class="volta" href="/" style="color:var(--txt)"><h1>Ad Animado</h1></a><span class="esp"></span><button onclick="abrirCustos()">Custos</button><button onclick="abrirCfg()">⚙ Configurações</button><button class="pri" id="btNovo" onclick="abrirNovo()">+ Novo ad animado</button></header>
+<header><a class="volta" href="/" style="color:var(--txt)"><h1>Ad Animado</h1></a><a class="volta" href="/ugc" style="color:var(--sub);margin-left:6px">UGC ultra-realista →</a><span class="esp"></span><button onclick="abrirCustos()">Custos</button><button onclick="abrirCfg()">⚙ Configurações</button><button class="pri" id="btNovo" onclick="abrirNovo()">+ Novo ad animado</button></header>
 <div class="modal" id="cfg"><div class="caixa">
   <div class="acoes" style="justify-content:space-between;margin-bottom:6px"><h3 style="margin:0">Configurações</h3><button onclick="fecharCfg()">Fechar</button></div>
   <p class="cinza peq">As chaves ficam só neste computador (~/.config/ad-animado). A página recebe apenas se está configurada e os últimos caracteres. Campo vazio mantém a chave atual.</p>
@@ -387,6 +387,7 @@ async function apagar(){if(confirm("Apagar este ad animado com todas as imagens 
 if(ID){$("#btNovo").onclick=()=>location.href="/animado?novo=1";carrega()}
 else if(new URLSearchParams(location.search).get("novo"))abrirNovo();
 else lista();
+if(location.hash=="#cfg")setTimeout(()=>{abrirCfg();history.replaceState(null,"",location.pathname+location.search)},50);
 
 // ---------------- configurações
 let CFG={};

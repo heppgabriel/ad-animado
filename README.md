@@ -40,14 +40,27 @@ Na primeira vez demora alguns minutos. No fim, o app abre sozinho no navegador (
 
 Para atualizar, rode o mesmo comando de instalação de novo. Os ads e as chaves nunca são apagados.
 
+## UGC ultra-realista (página /ugc)
+
+Avatar falando para a câmera, com cara de vídeo de celular de verdade, seguindo as skills **omni-ugc-director** e **troca-rosto-pinterest**:
+
+1. Cole o roteiro (fica travado, palavra por palavra) e envie uma ou mais **imagens iniciais** (frames reais, de preferência do Pinterest).
+2. Opcional: envie a **foto da avatar** e marque em quais cenas montar ela (troca de rosto no Nano Banana Pro), com pedidos como "segurando o produto". Sem foto, dá para descrever um rosto novo.
+3. O Claude lê cada imagem e o vídeo de referência, divide a fala em clipes de 4 a 10 s pela velocidade da fala (auditoria de integridade: roteiro = soma das falas) e escreve os prompts do **Gemini Omni Flash** com todas as travas.
+4. Os vídeos saem pela **KIE** ou pelo **Google AI Studio** (você escolhe), todos ao mesmo tempo. Opcional: **B-roll** no Kling cobrindo partes da fala.
+5. Assista e aprove um por um; troque a cena de qualquer clipe ou a imagem de qualquer cena (os prompts se reescrevem sozinhos); refaça o que não ficou bom.
+6. Baixe a **pasta com os clipes numerados** (.zip) ou **todos juntos** num vídeo só.
+
+Os UGCs ficam em `Ads Animados/UGC/<nome>`.
+
 ## Primeira vez: ⚙ Configurações
 
 | O quê | Para quê | Como |
 |---|---|---|
 | **Claude** | storyboard, prompts, conferência | Pela **assinatura** (Pro/Max): precisa do Claude Code instalado e logado no computador (`claude` no Terminal/PowerShell). Se o teste falhar, rode `claude setup-token` e cole o token. Ou use uma chave da API. |
 | **Grok** | imagens e vídeos | Pela **assinatura**: precisa do Grok CLI instalado e logado (rode `grok` uma vez e entre com a sua conta; usa a cota semanal, sem cobrança por uso). Sem ele, use uma chave da API da xAI ou a KIE. |
-| **KIE** | Nano Banana, Seedream, Kling, Seedance, Veo… | Chave em kie.ai › API Key (cobra créditos). |
-| **Gemini** | opcional: assistir o vídeo de referência | Chave do Google AI Studio (tem plano gratuito). Sem ela, o Claude estuda a referência pelos quadros. |
+| **KIE** | Nano Banana, Seedream, Kling, Seedance, Veo, Gemini Omni… | Chave em kie.ai › API Key (cobra créditos). |
+| **Gemini** | opcional: assistir o vídeo de referência; Omni pelo Google no UGC | Chave do Google AI Studio (tem plano gratuito para o estudo; o Omni não tem). Sem ela, o Claude estuda a referência pelos quadros. |
 
 Cada pessoa da equipe usa as **próprias** contas: as chaves ficam só no computador de quem configurou.
 

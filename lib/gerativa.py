@@ -236,6 +236,9 @@ KIE_VID = {
     "grok-imagine/image-to-video": dict(nome="Grok Imagine (pela KIE)", durs=list(range(6, 31)), audio=False,
         monta=lambda url, d, res, audio, fim=None: dict(image_urls=[url], duration=str(d), mode="normal", aspect_ratio="9:16",
                                               resolution=_res(["480p", "720p", "1080p"], res, "720p"))),
+    "google/gemini-omni-flash-1-1": dict(nome="Gemini Omni Flash 1.1 (Google)", durs=[4, 6, 8, 10], audio=True,
+        monta=lambda url, d, res, audio, fim=None: dict(image_urls=[url] + ([fim] if fim else []), duration=str(d), aspect_ratio="9:16",
+                                              resolution=_res(["360p", "720p", "1080p", "4k"], res, "720p"))),
     "veo-3-1": dict(nome="Veo 3.1 (Google)", durs=[4, 6, 8], audio=True,
         monta=lambda url, d, res, audio, fim=None: dict(image_urls=[url] + ([fim] if fim else []), generation_type="FIRST_AND_LAST_FRAMES_2_VIDEO",
                                               aspect_ratio="9:16", duration=d, resolution=_res(["720p", "1080p"], res, "720p")), final=True),
@@ -349,11 +352,85 @@ class Kie:
         dados, cred = self.tarefa(self.modelo_video, dict(prompt=prompt, **spec["monta"](self.subir(imagem), d, self.resolucao, audio and spec["audio"], fim)))
         return dados, self._usd(cred), True
 
+    def gerar_omni(self, prompt, imagens, duracao, resolucao=None):
+        """UGC: Gemini Omni Flash 1.1 com várias imagens de referência (a 1ª é o @image1 / quadro inicial; até 7)."""
+        d = _perto([4, 6, 8, 10], duracao)
+        entrada = dict(prompt=prompt, image_urls=[self.subir(a) for a in list(imagens)[:7]], duration=str(d), aspect_ratio="9:16",
+                       resolution=_res(["360p", "720p", "1080p", "4k"], resolucao or self.resolucao, "720p"))
+        dados, cred = self.tarefa("google/gemini-omni-flash-1-1", entrada)
+        return dados, self._usd(cred), True
+
     def testar(self):
         try:
             r = self._req("GET", KIE_API + "/api/v1/chat/credit", timeout=20, tentativas=1)
             return dict(ok=True, msg=f"chave válida · {r.get('data')} créditos na KIE")
         except ErroGerativa as e: return dict(ok=False, msg=str(e))
+
+# ---------------------------------------------------------------- Gemini Omni direto no Google
+"""Google AI Studio (Interactions API): POST /v1beta/interactions {model: gemini-omni-1.1-flash, input: [imagens..., texto],
+response_format: {type: video, aspect_ratio, resolution, delivery: uri}} -> steps[].content[] {type: video, data|uri}.
+A duração vem do texto do prompt ("8 seconds"). Sem plano gratuito (~US$ 0,10 por segundo em 720p). Chave: a do Gemini em ⚙."""
+GOOGLE_API = os.environ.get("ESTUDIO_GOOGLE_API") or "https://generativelanguage.googleapis.com/v1beta"
+OMNI_GOOGLE = "gemini-omni-1.1-flash"
+PRECO_OMNI_GOOGLE = {"360p": 0.05, "720p": 0.10, "1080p": 0.15, "4k": 0.40}   # US$/s, estimativa
+
+class GoogleOmni:
+    nome = "Google (Gemini API)"
+    assinatura = False
+    def __init__(self):
+        self.chave = os.environ.get("GEMINI_API_KEY") or chaves.ler().get("gemini", "")
+        if not self.chave: raise ErroGerativa("para o Omni pelo Google, cole a chave do Google AI Studio em ⚙ Configurações › Gemini", fatal=True)
+        self.resolucao = chaves.ler().get("gen_resolucao") or "720p"
+
+    def _baixar(self, uri, limite=600):
+        t0 = time.time(); ultimo = ""
+        while time.time() - t0 < limite:
+            req = urllib.request.Request(uri, headers={"x-goog-api-key": self.chave, **NAVEGADOR})
+            try:
+                dados = urllib.request.urlopen(req, timeout=300).read()
+                if dados[4:8] == b"ftyp" or len(dados) > 100_000: return dados
+                ultimo = dados[:200].decode("utf-8", "replace")                     # ainda processando (JSON de estado)
+            except urllib.error.HTTPError as e:
+                if e.code in (401, 403): raise ErroGerativa("o Google recusou a chave ao baixar o vídeo", fatal=True)
+                ultimo = f"HTTP {e.code}"
+            time.sleep(6)
+        raise ErroGerativa(f"o vídeo do Google não ficou pronto para baixar ({ultimo[:120]})")
+
+    def gerar_omni(self, prompt, imagens, duracao, resolucao=None):
+        res = _res(["360p", "720p", "1080p", "4k"], resolucao or self.resolucao, "720p")
+        partes = [dict(type="image", data=base64.b64encode(open(a, "rb").read()).decode(), mime_type=_mime(a)) for a in list(imagens)[:7]]
+        corpo = dict(model=OMNI_GOOGLE, input=partes + [dict(type="text", text=prompt)], store=False,
+                     generation_config=dict(video_config=dict(task="image_to_video" if partes else "text_to_video")),
+                     response_format=dict(type="video", aspect_ratio="9:16", resolution=res, delivery="uri"))
+        req = urllib.request.Request(GOOGLE_API + "/interactions", data=json.dumps(corpo).encode(),
+                                     headers={"x-goog-api-key": self.chave, "Content-Type": "application/json"})
+        for t in range(3):
+            try: r = json.loads(urllib.request.urlopen(req, timeout=1200).read()); break
+            except urllib.error.HTTPError as e:
+                msg = e.read().decode("utf-8", "replace")[:400]
+                if e.code in (401, 403): raise ErroGerativa("o Google recusou a chave (o Omni não tem plano gratuito: ative o faturamento no AI Studio)", fatal=True)
+                if e.code in (429, 500, 502, 503, 504) and t < 2: time.sleep(15 * (t + 1)); continue
+                if re.search(r"safety|policy|blocked", msg, re.I): raise ErroGerativa("o Google bloqueou este prompt pela política de conteúdo — neutralize a fala/CTA")
+                raise ErroGerativa(f"o Google respondeu {e.code}: {msg[:200]}")
+            except (urllib.error.URLError, TimeoutError) as e:
+                if t < 2: time.sleep(10); continue
+                raise ErroGerativa(f"sem conexão com o Google ({e})")
+        if r.get("status") in ("failed", "cancelled"): raise ErroGerativa(f"o Omni não gerou ({r.get('status')})")
+        for st in r.get("steps") or r.get("outputs") or []:
+            for c in (st.get("content") if isinstance(st, dict) else None) or [st]:
+                if isinstance(c, dict) and c.get("type") == "video":
+                    if c.get("data"): dados = base64.b64decode(c["data"])
+                    elif c.get("uri"): dados = self._baixar(c["uri"])
+                    else: continue
+                    return dados, round(_perto([4, 6, 8, 10], duracao) * PRECO_OMNI_GOOGLE.get(res, 0.10), 4), True
+        raise ErroGerativa("o Google respondeu sem vídeo (o prompt pode ter sido filtrado)")
+
+def _mime(arq):
+    return {".png": "image/png", ".webp": "image/webp"}.get(os.path.splitext(arq)[1].lower(), "image/jpeg")
+
+OMNI_PROVEDORES = [dict(id="kie", nome="KIE (créditos da KIE)"), dict(id="google", nome="Google AI Studio (chave do Gemini, ~US$ 0,10/s)")]
+def gerador_omni(provedor="kie"):
+    return GoogleOmni() if provedor == "google" else Kie()
 
 # ---------------------------------------------------------------- escolha por projeto
 def padrao_img(): return chaves.ler().get("gen_img") or "grok"
