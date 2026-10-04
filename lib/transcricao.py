@@ -39,11 +39,20 @@ def converter_segmentos(segmentos):
     return {"segments": resultado}
 
 
+def _carregar(audio):
+    """Áudio -> float32 mono 16 kHz pelo ffmpeg, sem passar pelo PyAV (versões novas do PyAV quebram o
+    decode_audio do faster-whisper: open() got an unexpected keyword argument 'metadata_errors')."""
+    import subprocess, numpy as np
+    r = subprocess.run(["ffmpeg", "-v", "error", "-i", audio, "-f", "s16le", "-ac", "1", "-ar", "16000", "-"], capture_output=True)
+    if r.returncode: raise RuntimeError("ffmpeg não conseguiu ler o áudio: " + r.stderr.decode("utf-8", "replace")[-200:])
+    return np.frombuffer(r.stdout, np.int16).astype(np.float32) / 32768.0
+
+
 def transcrever_arquivo(audio, prompt=""):
     # O gerador executa a inferência ao iterar; manter a trava até terminar evita picos de RAM.
     with _trava:
         segmentos, _ = modelo().transcribe(
-            audio, language="pt", word_timestamps=True, initial_prompt=prompt or None,
+            _carregar(audio), language="pt", word_timestamps=True, initial_prompt=prompt or None,
             condition_on_previous_text=False, vad_filter=False,
         )
         return converter_segmentos(segmentos)
