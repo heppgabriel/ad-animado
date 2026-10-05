@@ -15,10 +15,10 @@ _lock = threading.Lock()
 
 # Preço de tabela do Claude, US$ por milhão de tokens (entrada, saída). Cache de 5 min: escrita 1,25x a entrada,
 # leitura 0,1x. Os "tokens de pensamento" já vêm dentro da saída. Se a Anthropic mudar o preço, mude aqui.
-PRECOS = {"claude-opus-5": (5.0, 25.0), "claude-sonnet-5": (2.0, 10.0), "claude-opus-4-8": (5.0, 25.0), "claude-fable-5-1": (10.0, 50.0)}
+PRECOS = {"claude-opus-5-5": (4.0, 20.0), "claude-sonnet-5-5": (2.0, 10.0), "claude-opus-5": (5.0, 25.0), "claude-sonnet-5": (2.0, 10.0), "claude-opus-4-8": (5.0, 25.0), "claude-fable-5-1": (10.0, 50.0)}
 
 def custo_claude(modelo, entrada, saida, cache_escrita=0, cache_leitura=0):
-    pe, ps = PRECOS.get(modelo, PRECOS["claude-opus-5"])
+    pe, ps = PRECOS.get(modelo, PRECOS["claude-opus-5-5"])
     return (entrada * pe + saida * ps + cache_escrita * pe * 1.25 + cache_leitura * pe * 0.1) / 1e6
 
 def arq(d): return os.path.join(d, "custos.json")

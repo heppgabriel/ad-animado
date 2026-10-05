@@ -40,7 +40,7 @@ class Claude:
         assinatura=True força o plano do Claude (Claude Code), mesmo com a chave da API escolhida em ⚙ — é o modo
         "sem gastar API" do Ad Animado."""
         d = chaves.ler()
-        self.modelo = modelo or d.get("modelo") or "claude-opus-5"
+        self.modelo = modelo or d.get("modelo") or "claude-opus-5-5"
         self.uso = Uso(); self.log = log; self.fallback = True; self.ao_cobrar = ao_cobrar
         self.assinatura = bool(assinatura) or (chave is None and usa_assinatura())
         if self.assinatura: self.c = None; return
@@ -216,7 +216,7 @@ def testar():
         try:
             r = asyncio.run(_consultar("Responda só com o JSON pedido.", [texto("Diga ok.")],
                                        {"type": "object", "properties": {"ok": {"type": "boolean"}}, "required": ["ok"], "additionalProperties": False},
-                                       d.get("modelo") or "claude-opus-5", "low", None))
+                                       d.get("modelo") or "claude-opus-5-5", "low", None))
             if r is None or r.is_error:
                 e = erro_assinatura("; ".join((r.errors or []) if r else []) or (r.result if r else ""), getattr(r, "api_error_status", None) if r else None)
                 return dict(ok=False, msg=str(e))
@@ -226,7 +226,7 @@ def testar():
     if not d["anthropic"]: return dict(ok=False, msg="nenhuma chave salva")
     try:
         c = anthropic.Anthropic(api_key=d["anthropic"], max_retries=1, timeout=20.0)
-        m = c.models.retrieve(d.get("modelo") or "claude-opus-5")
+        m = c.models.retrieve(d.get("modelo") or "claude-opus-5-5")
         return dict(ok=True, msg=f"chave válida · modelo {m.display_name} disponível")
     except anthropic.AuthenticationError:
         return dict(ok=False, msg="chave inválida")

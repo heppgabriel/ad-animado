@@ -5,10 +5,12 @@ import os, json
 
 ARQ = os.path.abspath(os.path.expanduser(os.environ.get("AD_ANIMADO_CHAVES") or os.environ.get("ESTUDIO_CHAVES") or "~/.config/ad-animado/chaves.json"))
 PASTA = os.path.dirname(ARQ)
-MODELOS = [dict(id="claude-opus-5", nome="Claude Opus 5 (recomendado)"),
-           dict(id="claude-sonnet-5", nome="Claude Sonnet 5 (mais barato)")]
+MODELOS = [dict(id="claude-opus-5-5", nome="Claude Opus 5.5 (recomendado)"),
+           dict(id="claude-sonnet-5-5", nome="Claude Sonnet 5.5 (mais barato)"),
+           dict(id="claude-opus-5", nome="Claude Opus 5"),
+           dict(id="claude-sonnet-5", nome="Claude Sonnet 5")]
 PADRAO = dict(anthropic="", gemini="", openrouter="", xai="", kie="",
-              modelo="claude-opus-5", modelo_gemini="gemini-3.8-flash",
+              modelo="claude-opus-5-5", modelo_gemini="gemini-3.8-flash",
               gen_provedor="grok", gen_resolucao="720p", gen_auth="assinatura", gen_modelo_img="grok-imagine-image",
               gen_img="grok", gen_video="grok", claude_auth="assinatura", claude_token="", gemini_gratis=False)
 AUTH_CLAUDE = [dict(id="assinatura", nome="Minha assinatura do Claude (Pro/Max) — usa o limite do plano, pelo Claude Code deste computador"),
